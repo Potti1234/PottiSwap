@@ -13,6 +13,7 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as contractDeployment from "../contractDeployment.js";
 import type * as myFunctions from "../myFunctions.js";
 
 /**
@@ -24,6 +25,7 @@ import type * as myFunctions from "../myFunctions.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  contractDeployment: typeof contractDeployment;
   myFunctions: typeof myFunctions;
 }>;
 export declare const api: FilterApi<
