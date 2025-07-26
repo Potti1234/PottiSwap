@@ -11,7 +11,7 @@ import {
 } from '@rainbow-me/rainbowkit';
 import { WagmiProvider } from 'wagmi';
 import {
-  sepolia
+  sepolia, mainnet
 } from 'wagmi/chains';
 import {
   QueryClientProvider,
@@ -28,8 +28,7 @@ const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 const config = getDefaultConfig({
   appName: 'PottiSwap',
   projectId: 'YOUR_PROJECT_ID',
-  chains: [sepolia],
-  ssr: false, // If your dApp uses server side rendering (SSR)
+  chains: [sepolia, mainnet],
 });
 
 const queryClient = new QueryClient();
