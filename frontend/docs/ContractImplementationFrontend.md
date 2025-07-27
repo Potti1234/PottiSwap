@@ -78,14 +78,21 @@ This document outlines the step-by-step plan to implement cross-chain swap funct
 - **orderStatus**: Detailed lifecycle management with granular status tracking and audit trail
 - **userBalances**: Cross-chain balance tracking with token information and allowance management
 
-#### Step 2.2: Backend Functions for Orders
+#### Step 2.2: Backend Functions for Orders ✅ COMPLETED
 
 - **File**: `frontend/convex/swapOrders.ts` (new file)
 - **Actions**:
-  - Create `createSwapOrder` mutation
-  - Create `getUserOrders` query
-  - Create `updateOrderStatus` mutation
-  - Create `getOrderDetails` query
+  - ✅ Create `createSwapOrder` mutation
+  - ✅ Create `getUserOrders` query
+  - ✅ Create `updateOrderStatus` mutation
+  - ✅ Create `getOrderDetails` query
+- **Status**: Complete - Ready for Step 2.3
+
+**Implemented Functions:**
+
+- **Public Functions**: `createSwapOrder`, `getUserOrders`, `getActiveOrders`, `getOrderDetails`, `updateOrderStatus`, `updateOrderExecution`, `cancelOrder`, `getOrderStatusHistory`
+- **Internal Functions**: `getOrderByHash`, `updateOrderStatusDetailed`
+- **Features**: Complete order lifecycle management, status tracking, execution details, and audit trail
 
 #### Step 2.3: Frontend Order Creation Interface
 
