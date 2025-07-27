@@ -13,6 +13,8 @@ export default defineSchema({
       v.literal("EscrowFactory"),
       v.literal("EscrowSrc"),
       v.literal("EscrowDst"),
+      v.literal("TestEscrowFactory"),
+      v.literal("Resolver"),
     ),
     contractAddress: v.string(),
     chainId: v.number(),
@@ -54,6 +56,8 @@ export default defineSchema({
       v.literal("EscrowFactory"),
       v.literal("EscrowSrc"),
       v.literal("EscrowDst"),
+      v.literal("TestEscrowFactory"),
+      v.literal("Resolver"),
     ),
     chainId: v.number(),
 

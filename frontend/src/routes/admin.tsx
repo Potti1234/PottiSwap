@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAccount, useChainId } from 'wagmi'
 import { useMutation, useQuery } from 'convex/react'
 import { api } from '../../convex/_generated/api'
@@ -8,17 +8,31 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Badge } from '../components/ui/badge'
 import { Separator } from '../components/ui/separator'
 import { Loader2, CheckCircle, XCircle, ExternalLink, Copy } from 'lucide-react'
+import { 
+  useDeployTestEscrowFactory, 
+  useDeployResolver, 
+  useWaitForDeployment,
+  SEPOLIA_DEPLOYMENT_CONFIG,
+  createResolverDeploymentConfig
+} from '../lib/contractDeployment'
 
 export const Route = createFileRoute('/admin')({
   component: RouteComponent,
 })
 
 // Contract types for deployment
-const CONTRACT_TYPES = [
-  { id: 'EscrowFactory', name: 'Escrow Factory', description: 'Main factory contract for creating escrows' },
-  { id: 'EscrowSrc', name: 'Escrow Source', description: 'Source chain escrow implementation' },
-  { id: 'EscrowDst', name: 'Escrow Destination', description: 'Destination chain escrow implementation' },
-] as const
+type ContractType = 'TestEscrowFactory' | 'Resolver'
+
+interface ContractTypeConfig {
+  id: ContractType
+  name: string
+  description: string
+}
+
+const CONTRACT_TYPES: ContractTypeConfig[] = [
+  { id: 'TestEscrowFactory', name: 'Test Escrow Factory', description: 'Main factory contract for creating escrows' },
+  { id: 'Resolver', name: 'Resolver', description: 'Resolver contract for handling swap logic' },
+]
 
 // Common chain configurations
 const SUPPORTED_CHAINS = [
@@ -35,6 +49,36 @@ function RouteComponent() {
   const [deploymentResults, setDeploymentResults] = useState<Record<string, { address: string; txHash: string }>>({})
   const [errorMessages, setErrorMessages] = useState<Record<string, string>>({})
 
+  // Wagmi deployment hooks
+  const { 
+    deployTestEscrowFactory, 
+    hash: factoryHash, 
+    isPending: factoryPending, 
+    error: factoryError 
+  } = useDeployTestEscrowFactory()
+  
+  const { 
+    deployResolver, 
+    hash: resolverHash, 
+    isPending: resolverPending, 
+    error: resolverError 
+  } = useDeployResolver()
+
+  // Wait for deployment receipts
+  const { 
+    receipt: factoryReceipt, 
+    isError: factoryReceiptError, 
+    isLoading: factoryReceiptLoading,
+    contractAddress: factoryAddress 
+  } = useWaitForDeployment(factoryHash)
+  
+  const { 
+    receipt: resolverReceipt, 
+    isError: resolverReceiptError, 
+    isLoading: resolverReceiptLoading,
+    contractAddress: resolverAddress 
+  } = useWaitForDeployment(resolverHash)
+
   // Convex queries and mutations
   const deployedContracts = useQuery(api.contractDeployment.getDeployedContracts, {
     chainId: chainId || undefined,
@@ -42,6 +86,76 @@ function RouteComponent() {
   })
   const chainConfigs = useQuery(api.contractDeployment.getChainConfigs, { activeOnly: true })
   const storeDeployedContract = useMutation(api.contractDeployment.storeDeployedContract)
+
+  // Handle deployment results and store in Convex
+  useEffect(() => {
+    if (factoryReceipt && factoryAddress && !factoryReceiptError) {
+      // Store TestEscrowFactory deployment
+      storeDeployedContract({
+        contractType: 'TestEscrowFactory',
+        contractAddress: factoryAddress,
+        chainId: chainId!,
+        deployer: address!,
+        deployerName: 'Admin User',
+        transactionHash: factoryHash!,
+        blockNumber: Number(factoryReceipt.blockNumber),
+        deploymentTimestamp: Date.now(),
+        networkName: SUPPORTED_CHAINS.find(c => c.id === chainId)?.name || 'Unknown',
+        deployedBy: address!,
+      }).then(() => {
+        setDeploymentResults(prev => ({ 
+          ...prev, 
+          'TestEscrowFactory': { address: factoryAddress, txHash: factoryHash! } 
+        }))
+        setDeploymentStatus(prev => ({ ...prev, 'TestEscrowFactory': 'success' }))
+      })
+    }
+  }, [factoryReceipt, factoryAddress, factoryReceiptError, factoryHash, chainId, address, storeDeployedContract])
+
+  useEffect(() => {
+    if (resolverReceipt && resolverAddress && !resolverReceiptError) {
+      // Store Resolver deployment
+      storeDeployedContract({
+        contractType: 'Resolver',
+        contractAddress: resolverAddress,
+        chainId: chainId!,
+        deployer: address!,
+        deployerName: 'Admin User',
+        transactionHash: resolverHash!,
+        blockNumber: Number(resolverReceipt.blockNumber),
+        deploymentTimestamp: Date.now(),
+        networkName: SUPPORTED_CHAINS.find(c => c.id === chainId)?.name || 'Unknown',
+        deployedBy: address!,
+      }).then(() => {
+        setDeploymentResults(prev => ({ 
+          ...prev, 
+          'Resolver': { address: resolverAddress, txHash: resolverHash! } 
+        }))
+        setDeploymentStatus(prev => ({ ...prev, 'Resolver': 'success' }))
+      })
+    }
+  }, [resolverReceipt, resolverAddress, resolverReceiptError, resolverHash, chainId, address, storeDeployedContract])
+
+  // Handle deployment errors
+  useEffect(() => {
+    if (factoryError) {
+      setErrorMessages(prev => ({ 
+        ...prev, 
+        'TestEscrowFactory': factoryError.message || 'Factory deployment failed' 
+      }))
+      setDeploymentStatus(prev => ({ ...prev, 'TestEscrowFactory': 'error' }))
+    }
+  }, [factoryError])
+
+  useEffect(() => {
+    if (resolverError) {
+      setErrorMessages(prev => ({ 
+        ...prev, 
+        'Resolver': resolverError.message || 'Resolver deployment failed' 
+      }))
+      setDeploymentStatus(prev => ({ ...prev, 'Resolver': 'error' }))
+    }
+  }, [resolverError])
 
   // Handle contract deployment
   const handleDeployContract = async (contractType: string) => {
@@ -66,36 +180,33 @@ function RouteComponent() {
     setErrorMessages(prev => ({ ...prev, [contractType]: '' }))
 
     try {
-      // TODO: Implement actual contract deployment with wagmi
-      // This is a placeholder for the deployment logic
-      console.log(`Deploying ${contractType} on chain ${chainId}`)
-      
-      // Simulate deployment (replace with actual wagmi deployment)
-      await new Promise(resolve => setTimeout(resolve, 3000))
-      
-      // Mock deployment result
-      const mockAddress = `0x${Math.random().toString(16).substring(2, 42)}`
-      const mockTxHash = `0x${Math.random().toString(16).substring(2, 66)}`
-      
-      // Store in Convex
-      await storeDeployedContract({
-        contractType: contractType as 'EscrowFactory' | 'EscrowSrc' | 'EscrowDst',
-        contractAddress: mockAddress,
-        chainId: chainId,
-        deployer: address!,
-        deployerName: 'Admin User',
-        transactionHash: mockTxHash,
-        blockNumber: Math.floor(Math.random() * 1000000),
-        deploymentTimestamp: Date.now(),
-        networkName: SUPPORTED_CHAINS.find(c => c.id === chainId)?.name || 'Unknown',
-        deployedBy: address!,
-      })
-
-      setDeploymentResults(prev => ({ 
-        ...prev, 
-        [contractType]: { address: mockAddress, txHash: mockTxHash } 
-      }))
-      setDeploymentStatus(prev => ({ ...prev, [contractType]: 'success' }))
+      if (contractType === 'TestEscrowFactory') {
+        // Deploy TestEscrowFactory
+        const config = {
+          ...SEPOLIA_DEPLOYMENT_CONFIG,
+          owner: address as `0x${string}`,
+        }
+        
+        await deployTestEscrowFactory(config)
+        
+      } else if (contractType === 'Resolver') {
+        // Get the deployed TestEscrowFactory address first
+        const factoryContract = deployedContracts?.find(c => 
+          c.contractType === 'TestEscrowFactory' && c.chainId === chainId
+        )
+        
+        if (!factoryContract) {
+          throw new Error('TestEscrowFactory must be deployed first')
+        }
+        
+        const config = createResolverDeploymentConfig(
+          factoryContract.contractAddress as `0x${string}`,
+          SEPOLIA_DEPLOYMENT_CONFIG.limitOrderProtocol,
+          address as `0x${string}`
+        )
+        
+        await deployResolver(config)
+      }
       
     } catch (error) {
       console.error(`Error deploying ${contractType}:`, error)
@@ -183,7 +294,11 @@ function RouteComponent() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {CONTRACT_TYPES.map((contract) => {
-              const status = deploymentStatus[contract.id] || 'idle'
+                                   const status = contract.id === 'TestEscrowFactory' 
+                       ? (factoryPending ? 'deploying' : deploymentStatus[contract.id] || 'idle')
+                       : contract.id === 'Resolver'
+                       ? (resolverPending ? 'deploying' : deploymentStatus[contract.id] || 'idle')
+                       : deploymentStatus[contract.id] || 'idle'
               const result = deploymentResults[contract.id]
               const error = errorMessages[contract.id]
                              const isDeployed = deployedContracts?.some(c => 
