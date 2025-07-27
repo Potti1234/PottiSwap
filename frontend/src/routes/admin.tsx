@@ -16,7 +16,8 @@ import {
 import {
   NetworkStatusCard,
   ContractDeploymentCard,
-  DeployedContractsOverview
+  DeployedContractsOverview,
+  SwapOrderCreationCard
 } from '../components/admin'
 
 export const Route = createFileRoute('/admin')({
@@ -260,6 +261,9 @@ function RouteComponent() {
         onCopyAddress={copyToClipboard}
         onCopyTxHash={copyToClipboard}
       />
+
+      {/* Swap Order Creation */}
+      <SwapOrderCreationCard />
     </div>
   )
 }
