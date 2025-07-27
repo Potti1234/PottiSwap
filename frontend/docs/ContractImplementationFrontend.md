@@ -63,13 +63,20 @@ This document outlines the step-by-step plan to implement cross-chain swap funct
 
 **Goal**: Allow users to create cross-chain swap orders
 
-#### Step 2.1: Backend Schema Extension
+#### Step 2.1: Backend Schema Extension ✅ COMPLETED
 
 - **File**: `frontend/convex/schema.ts`
 - **Actions**:
-  - Add `swapOrders` collection
-  - Add `orderStatus` collection
-  - Add `userBalances` collection for tracking
+  - ✅ Add `swapOrders` collection
+  - ✅ Add `orderStatus` collection
+  - ✅ Add `userBalances` collection for tracking
+- **Status**: Complete - Ready for Step 2.2
+
+**Added Collections:**
+
+- **swapOrders**: Comprehensive order tracking with source/destination chain details, timelock configuration, execution status, and metadata
+- **orderStatus**: Detailed lifecycle management with granular status tracking and audit trail
+- **userBalances**: Cross-chain balance tracking with token information and allowance management
 
 #### Step 2.2: Backend Functions for Orders
 
