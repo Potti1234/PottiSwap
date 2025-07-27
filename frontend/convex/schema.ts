@@ -179,6 +179,10 @@ export default defineSchema({
     dstPublicWithdrawal: v.number(), // Destination public withdrawal timelock in seconds
     dstCancellation: v.number(), // Destination cancellation timelock in seconds
 
+    // Safety deposits
+    srcSafetyDeposit: v.string(), // Safety deposit amount in ETH (as string)
+    dstSafetyDeposit: v.string(), // Safety deposit amount in ETH (as string)
+
     // Order status and lifecycle
     status: v.union(
       v.literal("pending"),

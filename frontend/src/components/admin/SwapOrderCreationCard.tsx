@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { useAccount, useChainId } from 'wagmi'
-import { useMutation } from 'convex/react'
-import { api } from '../../../convex/_generated/api'
+import { useAccount } from 'wagmi'
+import { useCreateSwapOrder, validateSwapOrder, amountToWei } from '../../lib/swapOrders'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -62,6 +61,10 @@ interface SwapOrderForm {
   dstPublicWithdrawal: number
   dstCancellation: number
   
+  // Safety deposits
+  srcSafetyDeposit: string
+  dstSafetyDeposit: string
+  
   // Optional metadata
   notes: string
   tags: string[]
@@ -78,29 +81,32 @@ const DEFAULT_TIMELOCKS = {
   dstCancellation: 1800, // 30 minutes
 }
 
+const DEFAULT_SAFETY_DEPOSITS = {
+  srcSafetyDeposit: '0.001', // 0.001 ETH
+  dstSafetyDeposit: '0.001', // 0.001 ETH
+}
+
 export function SwapOrderCreationCard() {
   const { address, isConnected } = useAccount()
-  const chainId = useChainId()
   
   const [form, setForm] = useState<SwapOrderForm>({
     srcChainId: 11155111, // Default to Sepolia
     srcToken: '0x0000000000000000000000000000000000000000',
-    srcAmount: '',
+    srcAmount: '0.0001',
     dstChainId: 84532, // Default to Base Sepolia
     dstToken: '0x0000000000000000000000000000000000000000',
-    dstAmount: '',
+    dstAmount: '0.0001',
     ...DEFAULT_TIMELOCKS,
+    ...DEFAULT_SAFETY_DEPOSITS,
     notes: '',
     tags: [],
     expiresAt: null,
   })
   
-  const [isCreating, setIsCreating] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
-  // Convex mutations
-  const createSwapOrder = useMutation(api.swapOrders.createSwapOrder)
+  // Order management hooks
+  const { createOrder, isCreating, error, clearError } = useCreateSwapOrder()
 
   // Get available tokens for a chain
   const getTokensForChain = (chainId: number) => {
@@ -113,41 +119,25 @@ export function SwapOrderCreationCard() {
     return tokens.find(t => t.address.toLowerCase() === tokenAddress.toLowerCase())
   }
 
-  // Generate order ID and hash (in real implementation, this would be done on-chain)
-  const generateOrderId = () => {
-    return `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-  }
 
-  const generateOrderHash = () => {
-    return `0x${Math.random().toString(16).substr(2, 64)}`
-  }
-
-  // Convert amount to wei
-  const amountToWei = (amount: string, decimals: number) => {
-    if (!amount) return '0'
-    const multiplier = Math.pow(10, decimals)
-    return (parseFloat(amount) * multiplier).toString()
-  }
 
   // Handle form submission
   const handleCreateOrder = async () => {
     if (!isConnected || !address) {
-      setError('Please connect your wallet first')
+      clearError()
       return
     }
 
     if (!form.srcAmount || !form.dstAmount) {
-      setError('Please enter amounts for both source and destination')
+      clearError()
       return
     }
 
     if (form.srcChainId === form.dstChainId) {
-      setError('Source and destination chains must be different')
+      clearError()
       return
     }
 
-    setIsCreating(true)
-    setError(null)
     setSuccess(null)
 
     try {
@@ -158,14 +148,8 @@ export function SwapOrderCreationCard() {
         throw new Error('Invalid token selection')
       }
 
-      const orderId = generateOrderId()
-      const orderHash = generateOrderHash()
-
-      await createSwapOrder({
-        orderId,
-        orderHash,
-        creator: address,
-        creatorName: 'User',
+      // Validate order parameters
+      const validationErrors = validateSwapOrder({
         srcChainId: form.srcChainId,
         srcToken: form.srcToken,
         srcTokenSymbol: srcTokenDetails.symbol,
@@ -185,22 +169,56 @@ export function SwapOrderCreationCard() {
         dstWithdrawal: form.dstWithdrawal,
         dstPublicWithdrawal: form.dstPublicWithdrawal,
         dstCancellation: form.dstCancellation,
+        srcSafetyDeposit: form.srcSafetyDeposit,
+        dstSafetyDeposit: form.dstSafetyDeposit,
         notes: form.notes || undefined,
         tags: form.tags.length > 0 ? form.tags : undefined,
         expiresAt: form.expiresAt || undefined,
       })
 
-      setSuccess(`Swap order created successfully! Order ID: ${orderId}`)
+      if (validationErrors.length > 0) {
+        throw new Error(validationErrors.join(', '))
+      }
+
+      const result = await createOrder({
+        srcChainId: form.srcChainId,
+        srcToken: form.srcToken,
+        srcTokenSymbol: srcTokenDetails.symbol,
+        srcTokenDecimals: srcTokenDetails.decimals,
+        srcAmount: form.srcAmount,
+        srcAmountWei: amountToWei(form.srcAmount, srcTokenDetails.decimals),
+        dstChainId: form.dstChainId,
+        dstToken: form.dstToken,
+        dstTokenSymbol: dstTokenDetails.symbol,
+        dstTokenDecimals: dstTokenDetails.decimals,
+        dstAmount: form.dstAmount,
+        dstAmountWei: amountToWei(form.dstAmount, dstTokenDetails.decimals),
+        srcWithdrawal: form.srcWithdrawal,
+        srcPublicWithdrawal: form.srcPublicWithdrawal,
+        srcCancellation: form.srcCancellation,
+        srcPublicCancellation: form.srcPublicCancellation,
+        dstWithdrawal: form.dstWithdrawal,
+        dstPublicWithdrawal: form.dstPublicWithdrawal,
+        dstCancellation: form.dstCancellation,
+        srcSafetyDeposit: form.srcSafetyDeposit,
+        dstSafetyDeposit: form.dstSafetyDeposit,
+        notes: form.notes || undefined,
+        tags: form.tags.length > 0 ? form.tags : undefined,
+        expiresAt: form.expiresAt || undefined,
+      })
+
+      setSuccess(`Swap order created successfully! Order ID: ${result.orderId}`)
       
       // Reset form
       setForm({
         srcChainId: 11155111,
         srcToken: '0x0000000000000000000000000000000000000000',
-        srcAmount: '',
+        srcAmount: '0.0001',
         dstChainId: 84532,
         dstToken: '0x0000000000000000000000000000000000000000',
-        dstAmount: '',
+        dstAmount: '0.0001',
         ...DEFAULT_TIMELOCKS,
+        ...DEFAULT_SAFETY_DEPOSITS,
         notes: '',
         tags: [],
         expiresAt: null,
@@ -208,9 +226,7 @@ export function SwapOrderCreationCard() {
 
     } catch (err) {
       console.error('Error creating swap order:', err)
-      setError(err instanceof Error ? err.message : 'Failed to create swap order')
-    } finally {
-      setIsCreating(false)
+      // Error is handled by the hook
     }
   }
 
@@ -456,6 +472,41 @@ export function SwapOrderCreationCard() {
 
         <Separator />
 
+        {/* Safety Deposits */}
+        <div className="space-y-4">
+          <Label className="text-base font-semibold">Safety Deposits</Label>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <Label htmlFor="srcSafetyDeposit">Source Safety Deposit (ETH)</Label>
+              <Input
+                id="srcSafetyDeposit"
+                type="number"
+                step="0.001"
+                placeholder="0.001"
+                value={form.srcSafetyDeposit}
+                onChange={(e) => setForm(prev => ({ ...prev, srcSafetyDeposit: e.target.value }))}
+              />
+              <span className="text-xs text-muted-foreground">Amount of ETH to lock as safety deposit on source chain</span>
+            </div>
+
+            <div className="space-y-3">
+              <Label htmlFor="dstSafetyDeposit">Destination Safety Deposit (ETH)</Label>
+              <Input
+                id="dstSafetyDeposit"
+                type="number"
+                step="0.001"
+                placeholder="0.001"
+                value={form.dstSafetyDeposit}
+                onChange={(e) => setForm(prev => ({ ...prev, dstSafetyDeposit: e.target.value }))}
+              />
+              <span className="text-xs text-muted-foreground">Amount of ETH to lock as safety deposit on destination chain</span>
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
         {/* Optional Metadata */}
         <div className="space-y-4">
           <Label className="text-base font-semibold">Optional Metadata</Label>
@@ -501,6 +552,9 @@ export function SwapOrderCreationCard() {
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {SUPPORTED_CHAINS.find(c => c.id === form.srcChainId)?.name} → {SUPPORTED_CHAINS.find(c => c.id === form.dstChainId)?.name}
+                </div>
+                <div className="text-xs text-muted-foreground mt-2">
+                  Safety Deposits: {form.srcSafetyDeposit} ETH (src) + {form.dstSafetyDeposit} ETH (dst)
                 </div>
                 {form.notes && (
                   <div className="text-xs text-muted-foreground mt-2">

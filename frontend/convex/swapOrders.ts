@@ -45,6 +45,14 @@ export const createSwapOrder = mutation({
     dstPublicWithdrawal: v.number(),
     dstCancellation: v.number(),
 
+    // Safety deposits
+    srcSafetyDeposit: v.string(),
+    dstSafetyDeposit: v.string(),
+
+    // Secret management
+    secret: v.optional(v.string()),
+    secretHash: v.optional(v.string()),
+
     // Optional metadata
     notes: v.optional(v.string()),
     tags: v.optional(v.array(v.string())),
@@ -82,6 +90,10 @@ export const createSwapOrder = mutation({
       dstWithdrawal: args.dstWithdrawal,
       dstPublicWithdrawal: args.dstPublicWithdrawal,
       dstCancellation: args.dstCancellation,
+      srcSafetyDeposit: args.srcSafetyDeposit,
+      dstSafetyDeposit: args.dstSafetyDeposit,
+      secret: args.secret,
+      secretHash: args.secretHash,
       status: "pending",
       isActive: true,
       createdAt: now,
