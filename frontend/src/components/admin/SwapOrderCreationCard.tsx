@@ -11,14 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, Plus, ArrowRight, Clock, AlertCircle, CheckCircle } from 'lucide-react'
-
-// Common chain configurations
-const SUPPORTED_CHAINS = [
-  { id: 1, name: 'Ethereum Mainnet', symbol: 'ETH', isTestnet: false },
-  { id: 11155111, name: 'Sepolia Testnet', symbol: 'ETH', isTestnet: true },
-  { id: 84532, name: 'Base Sepolia Testnet', symbol: 'ETH', isTestnet: true },
-  { id: 8453, name: 'Base', symbol: 'ETH', isTestnet: false },
-] as const
+import { SUPPORTED_CHAINS } from '../../constants/supported_chains'
 
 // Common token configurations (for demo purposes)
 const COMMON_TOKENS = {

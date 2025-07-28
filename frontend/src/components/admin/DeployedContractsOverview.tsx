@@ -2,17 +2,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { Button } from '../ui/button'
 import { Badge } from '../ui/badge'
 import { Copy, ExternalLink } from 'lucide-react'
+import { SUPPORTED_CHAINS } from '../../constants/supported_chains'
 
 interface DeployedContractsOverviewProps {
   deployedContracts: any[] | undefined
   onCopyAddress: (text: string) => void
   onCopyTxHash: (text: string) => void
 }
-
-const SUPPORTED_CHAINS = [
-  { id: 1, name: 'Ethereum Mainnet', symbol: 'ETH', isTestnet: false },
-  { id: 11155111, name: 'Sepolia Testnet', symbol: 'ETH', isTestnet: true }
-] as const
 
 export function DeployedContractsOverview({
   deployedContracts,
