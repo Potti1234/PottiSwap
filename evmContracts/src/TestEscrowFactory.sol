@@ -1,6 +1,6 @@
 pragma solidity 0.8.23;
 
-import "./contracts/EscrowFactory.sol";
+import 'cross-chain-swap/contracts/EscrowFactory.sol';
 
 contract TestEscrowFactory is EscrowFactory {
     constructor(
@@ -10,14 +10,5 @@ contract TestEscrowFactory is EscrowFactory {
         address owner,
         uint32 rescueDelaySrc,
         uint32 rescueDelayDst
-    )
-        EscrowFactory(
-            limitOrderProtocol,
-            feeToken,
-            accessToken,
-            owner,
-            rescueDelayDst,
-            rescueDelayDst
-        )
-    {}
+    ) EscrowFactory(limitOrderProtocol, feeToken, accessToken, owner, rescueDelayDst, rescueDelayDst) {}
 }

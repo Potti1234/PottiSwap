@@ -4,3 +4,7 @@
 [submodule "evmContracts/lib/openzeppelin-contracts"]
 	path = evmContracts/lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "evmContracts/lib/cross-chain-swap"]
+	path = evmContracts/lib/cross-chain-swap
+	url = https://github.com/1inch/cross-chain-swap
+	branch = master
