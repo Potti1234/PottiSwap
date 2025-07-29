@@ -1,0 +1,9 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 0.3.4
+_src_path: gh:algorandfoundation/algokit-typescript-template
+author_email: lukas.pottner@gmail.com
+author_name: Potti1234
+contract_name: htlc
+preset_name: starter
+project_name: algorandContracts
+
