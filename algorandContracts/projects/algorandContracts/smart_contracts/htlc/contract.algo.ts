@@ -35,15 +35,13 @@ export class Escrow extends Contract {
   /**
    * Withdraw from escrow with known secret
    *
-   * @param secretHash Hash of the secret in keccak256
    * @param secret Secret
    */
   @arc4.abimethod()
-  public withdraw(secret: arc4.DynamicBytes) {
+  public withdraw(secret: arc4.StaticBytes<32>) {
     assert(this.makeHash(secret) === this.secretHash.value.bytes, "The password is not correct");
 
     assert(this.latestTimestamp() < this.rescueTime.value, "Escrow can be redeemed with password up to the rescue time");
-    assert(this.taker.value === new Address(), "The funds cannot be withdrawn until destination setter sets the real taker");
 
     // send payment to the taker
     this._send(this.taker.value, this.amount.value);
@@ -62,13 +60,13 @@ export class Escrow extends Contract {
   }
 
   /**
-   * Internal send dunds methos
+   * Internal send funds method
    */
   private _send(receiver: Address, amount: uint64): void {
     itxn
       .payment({
         amount: amount,
-        fee: 0,
+        fee: Global.minTxnFee,
         receiver: receiver.bytes,
       })
       .submit();
@@ -81,7 +79,7 @@ export class Escrow extends Contract {
    * @returns Hash of the secret
    */
   @arc4.abimethod({ readonly: true })
-  public makeHash(secret: arc4.DynamicBytes): bytes {
+  public makeHash(secret: arc4.StaticBytes<32>): bytes {
     return op.keccak256(secret.bytes);
   }
   /**

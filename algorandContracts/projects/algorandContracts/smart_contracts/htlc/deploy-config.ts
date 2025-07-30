@@ -1,12 +1,14 @@
 import { AlgorandClient } from "@algorandfoundation/algokit-utils";
 import { EscrowFactory } from "../artifacts/htlc/EscrowClient";
+import { keccak256, getBytes } from "ethers";
+import { Bytes } from "@algorandfoundation/algorand-typescript/primitives";
 
 // Below is a showcase of various deployment options you can use in TypeScript Client
 export async function deploy() {
   console.log("=== Deploying Htlc ===");
 
   const algorand = AlgorandClient.fromEnvironment();
-  const deployer = await algorand.account.fromEnvironment("DEPLOY");
+  const deployer = await algorand.account.fromEnvironment("DEPLOY5");
 
   const maker = await algorand.account.fromEnvironment("MAKER");
   const taker = await algorand.account.fromEnvironment("TAKER");
@@ -20,7 +22,7 @@ export async function deploy() {
   // If app was just created fund the app account
   if (["create", "replace"].includes(result.operationPerformed)) {
     await algorand.send.payment({
-      amount: (1).algo(),
+      amount: (2).algo(),
       sender: deployer.addr,
       receiver: appClient.appAddress,
     });
@@ -32,16 +34,26 @@ export async function deploy() {
     receiver: appClient.appAddress,
   });
 
+  const secret = crypto.getRandomValues(new Uint8Array(32));
+  const secretHash = keccak256(secret);
+
   const escrow = await appClient.send.create({
     args: {
       txnDeposit: deposit.transaction,
       timelock: 1000,
-      secretHash: new Uint8Array([
-        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
-      ]),
+      secretHash: getBytes(secretHash),
       taker: taker.addr.toString(),
     },
     sender: maker.addr,
     signer: maker.signer,
+  });
+
+  const claim = await appClient.send.withdraw({
+    args: {
+      secretHash: getBytes(secretHash),
+      secret: getBytes(secret),
+    },
+    sender: taker.addr,
+    signer: taker.signer,
   });
 }
