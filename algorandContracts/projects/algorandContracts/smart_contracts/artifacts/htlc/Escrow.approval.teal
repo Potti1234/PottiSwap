@@ -1,0 +1,375 @@
+#pragma version 10
+#pragma typetrack false
+
+// @algorandfoundation/algorand-typescript/arc4/index.d.ts::Contract.approvalProgram() -> uint64:
+main:
+    intcblock 0 1
+    bytecblock "amount" "rescueTime" "taker" 0x151f7c75 "secretHash" "creator"
+    // smart_contracts/htlc/contract.algo.ts:4
+    // export class Escrow extends Contract {
+    txn NumAppArgs
+    bz main_bare_routing@10
+    pushbytess 0x0923fd13 0x5905d4f4 0x31f26a9b 0x362d47d7 0x64ccd930 // method "create(pay,uint64,byte[32],address)void", method "withdraw(byte[])void", method "cancel()void", method "makeHash(byte[])byte[]", method "latestTimestamp()uint64"
+    txna ApplicationArgs 0
+    match main_create_route@3 main_withdraw_route@4 main_cancel_route@5 main_makeHash_route@6 main_latestTimestamp_route@7
+
+main_after_if_else@14:
+    // smart_contracts/htlc/contract.algo.ts:4
+    // export class Escrow extends Contract {
+    intc_0 // 0
+    return
+
+main_latestTimestamp_route@7:
+    // smart_contracts/htlc/contract.algo.ts:92
+    // @arc4.abimethod({ readonly: true })
+    txn OnCompletion
+    !
+    assert // OnCompletion is not NoOp
+    txn ApplicationID
+    assert // can only call when not creating
+    callsub latestTimestamp
+    itob
+    bytec_3 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+main_makeHash_route@6:
+    // smart_contracts/htlc/contract.algo.ts:83
+    // @arc4.abimethod({ readonly: true })
+    txn OnCompletion
+    !
+    assert // OnCompletion is not NoOp
+    txn ApplicationID
+    assert // can only call when not creating
+    // smart_contracts/htlc/contract.algo.ts:4
+    // export class Escrow extends Contract {
+    txna ApplicationArgs 1
+    // smart_contracts/htlc/contract.algo.ts:83
+    // @arc4.abimethod({ readonly: true })
+    callsub makeHash
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    bytec_3 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_1 // 1
+    return
+
+main_cancel_route@5:
+    // smart_contracts/htlc/contract.algo.ts:56
+    // @arc4.abimethod()
+    txn OnCompletion
+    !
+    assert // OnCompletion is not NoOp
+    txn ApplicationID
+    assert // can only call when not creating
+    callsub cancel
+    intc_1 // 1
+    return
+
+main_withdraw_route@4:
+    // smart_contracts/htlc/contract.algo.ts:41
+    // @arc4.abimethod()
+    txn OnCompletion
+    !
+    assert // OnCompletion is not NoOp
+    txn ApplicationID
+    assert // can only call when not creating
+    // smart_contracts/htlc/contract.algo.ts:4
+    // export class Escrow extends Contract {
+    txna ApplicationArgs 1
+    // smart_contracts/htlc/contract.algo.ts:41
+    // @arc4.abimethod()
+    callsub withdraw
+    intc_1 // 1
+    return
+
+main_create_route@3:
+    // smart_contracts/htlc/contract.algo.ts:20
+    // @arc4.abimethod()
+    txn OnCompletion
+    !
+    assert // OnCompletion is not NoOp
+    txn ApplicationID
+    assert // can only call when not creating
+    // smart_contracts/htlc/contract.algo.ts:4
+    // export class Escrow extends Contract {
+    txn GroupIndex
+    intc_1 // 1
+    -
+    dup
+    gtxns TypeEnum
+    intc_1 // pay
+    ==
+    assert // transaction type is pay
+    txna ApplicationArgs 1
+    btoi
+    txna ApplicationArgs 2
+    txna ApplicationArgs 3
+    // smart_contracts/htlc/contract.algo.ts:20
+    // @arc4.abimethod()
+    callsub create
+    intc_1 // 1
+    return
+
+main_bare_routing@10:
+    // smart_contracts/htlc/contract.algo.ts:4
+    // export class Escrow extends Contract {
+    txn OnCompletion
+    bnz main_after_if_else@14
+    txn ApplicationID
+    !
+    assert // can only call when creating
+    intc_1 // 1
+    return
+
+
+// smart_contracts/htlc/contract.algo.ts::Escrow.create(txnDeposit: uint64, timelock: uint64, secretHash: bytes, taker: bytes) -> void:
+create:
+    // smart_contracts/htlc/contract.algo.ts:20-21
+    // @arc4.abimethod()
+    // public create(txnDeposit: gtxn.PaymentTxn, timelock: uint64, secretHash: arc4.StaticBytes<32>, taker: Address): void {
+    proto 4 0
+    // smart_contracts/htlc/contract.algo.ts:22
+    // assert(txnDeposit.receiver === Global.currentApplicationAddress, "Receiver must be the escrow app");
+    frame_dig -4
+    gtxns Receiver
+    global CurrentApplicationAddress
+    ==
+    assert // Receiver must be the escrow app
+    // smart_contracts/htlc/contract.algo.ts:23
+    // assert(txnDeposit.sender === Txn.sender, "Sender of deposit must be the same as the sender of the app call");
+    frame_dig -4
+    gtxns Sender
+    txn Sender
+    ==
+    assert // Sender of deposit must be the same as the sender of the app call
+    // smart_contracts/htlc/contract.algo.ts:25
+    // this.amount.value = txnDeposit.amount;
+    frame_dig -4
+    gtxns Amount
+    // smart_contracts/htlc/contract.algo.ts:7
+    // public amount = GlobalState<uint64>();
+    bytec_0 // "amount"
+    // smart_contracts/htlc/contract.algo.ts:25
+    // this.amount.value = txnDeposit.amount;
+    swap
+    app_global_put
+    // smart_contracts/htlc/contract.algo.ts:7
+    // public amount = GlobalState<uint64>();
+    intc_0 // 0
+    bytec_0 // "amount"
+    app_global_get_ex
+    assert // check GlobalState exists
+    // smart_contracts/htlc/contract.algo.ts:26
+    // assert(this.amount.value > 0, "Deposit should be positive number");
+    assert // Deposit should be positive number
+    // smart_contracts/htlc/contract.algo.ts:28
+    // this.createdTime.value = this.latestTimestamp();
+    callsub latestTimestamp
+    // smart_contracts/htlc/contract.algo.ts:5
+    // public createdTime = GlobalState<uint64>();
+    pushbytes "createdTime"
+    // smart_contracts/htlc/contract.algo.ts:28
+    // this.createdTime.value = this.latestTimestamp();
+    swap
+    app_global_put
+    // smart_contracts/htlc/contract.algo.ts:29
+    // this.rescueTime.value = Global.latestTimestamp + timelock;
+    global LatestTimestamp
+    frame_dig -3
+    +
+    // smart_contracts/htlc/contract.algo.ts:6
+    // public rescueTime = GlobalState<uint64>();
+    bytec_1 // "rescueTime"
+    // smart_contracts/htlc/contract.algo.ts:29
+    // this.rescueTime.value = Global.latestTimestamp + timelock;
+    swap
+    app_global_put
+    // smart_contracts/htlc/contract.algo.ts:10
+    // public secretHash = GlobalState<arc4.StaticBytes<32>>();
+    bytec 4 // "secretHash"
+    // smart_contracts/htlc/contract.algo.ts:30
+    // this.secretHash.value = secretHash;
+    frame_dig -2
+    app_global_put
+    // smart_contracts/htlc/contract.algo.ts:9
+    // public taker = GlobalState<Address>();
+    bytec_2 // "taker"
+    // smart_contracts/htlc/contract.algo.ts:31
+    // this.taker.value = taker;
+    frame_dig -1
+    app_global_put
+    // smart_contracts/htlc/contract.algo.ts:8
+    // public creator = GlobalState<Address>();
+    bytec 5 // "creator"
+    // smart_contracts/htlc/contract.algo.ts:32
+    // this.creator.value = new Address(Txn.sender);
+    txn Sender
+    app_global_put
+    retsub
+
+
+// smart_contracts/htlc/contract.algo.ts::Escrow.withdraw(secret: bytes) -> void:
+withdraw:
+    // smart_contracts/htlc/contract.algo.ts:41-42
+    // @arc4.abimethod()
+    // public withdraw(secret: arc4.DynamicBytes) {
+    proto 1 0
+    // smart_contracts/htlc/contract.algo.ts:43
+    // assert(this.makeHash(secret) === this.secretHash.value.bytes, "The password is not correct");
+    frame_dig -1
+    callsub makeHash
+    // smart_contracts/htlc/contract.algo.ts:10
+    // public secretHash = GlobalState<arc4.StaticBytes<32>>();
+    intc_0 // 0
+    bytec 4 // "secretHash"
+    app_global_get_ex
+    assert // check GlobalState exists
+    // smart_contracts/htlc/contract.algo.ts:43
+    // assert(this.makeHash(secret) === this.secretHash.value.bytes, "The password is not correct");
+    ==
+    assert // The password is not correct
+    // smart_contracts/htlc/contract.algo.ts:45
+    // assert(this.latestTimestamp() < this.rescueTime.value, "Escrow can be redeemed with password up to the rescue time");
+    callsub latestTimestamp
+    // smart_contracts/htlc/contract.algo.ts:6
+    // public rescueTime = GlobalState<uint64>();
+    intc_0 // 0
+    bytec_1 // "rescueTime"
+    app_global_get_ex
+    assert // check GlobalState exists
+    // smart_contracts/htlc/contract.algo.ts:45
+    // assert(this.latestTimestamp() < this.rescueTime.value, "Escrow can be redeemed with password up to the rescue time");
+    <
+    assert // Escrow can be redeemed with password up to the rescue time
+    // smart_contracts/htlc/contract.algo.ts:9
+    // public taker = GlobalState<Address>();
+    intc_0 // 0
+    bytec_2 // "taker"
+    app_global_get_ex
+    assert // check GlobalState exists
+    // smart_contracts/htlc/contract.algo.ts:46
+    // assert(this.taker.value === new Address(), "The funds cannot be withdrawn until destination setter sets the real taker");
+    pushbytes base32(AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA) // addr AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ
+    ==
+    assert // The funds cannot be withdrawn until destination setter sets the real taker
+    // smart_contracts/htlc/contract.algo.ts:9
+    // public taker = GlobalState<Address>();
+    intc_0 // 0
+    bytec_2 // "taker"
+    app_global_get_ex
+    assert // check GlobalState exists
+    // smart_contracts/htlc/contract.algo.ts:7
+    // public amount = GlobalState<uint64>();
+    intc_0 // 0
+    bytec_0 // "amount"
+    app_global_get_ex
+    assert // check GlobalState exists
+    // smart_contracts/htlc/contract.algo.ts:49
+    // this._send(this.taker.value, this.amount.value);
+    callsub _send
+    retsub
+
+
+// smart_contracts/htlc/contract.algo.ts::Escrow.cancel() -> void:
+cancel:
+    // smart_contracts/htlc/contract.algo.ts:6
+    // public rescueTime = GlobalState<uint64>();
+    intc_0 // 0
+    bytec_1 // "rescueTime"
+    app_global_get_ex
+    assert // check GlobalState exists
+    // smart_contracts/htlc/contract.algo.ts:58
+    // assert(this.rescueTime.value < this.latestTimestamp(), "The escrow cannot be canceled yet");
+    callsub latestTimestamp
+    <
+    assert // The escrow cannot be canceled yet
+    // smart_contracts/htlc/contract.algo.ts:8
+    // public creator = GlobalState<Address>();
+    intc_0 // 0
+    bytec 5 // "creator"
+    app_global_get_ex
+    assert // check GlobalState exists
+    // smart_contracts/htlc/contract.algo.ts:7
+    // public amount = GlobalState<uint64>();
+    intc_0 // 0
+    bytec_0 // "amount"
+    app_global_get_ex
+    assert // check GlobalState exists
+    // smart_contracts/htlc/contract.algo.ts:61
+    // this._send(this.creator.value, this.amount.value);
+    callsub _send
+    retsub
+
+
+// smart_contracts/htlc/contract.algo.ts::Escrow._send(receiver: bytes, amount: uint64) -> void:
+_send:
+    // smart_contracts/htlc/contract.algo.ts:67
+    // private _send(receiver: Address, amount: uint64): void {
+    proto 2 0
+    // smart_contracts/htlc/contract.algo.ts:68-74
+    // itxn
+    //   .payment({
+    //     amount: amount,
+    //     fee: 0,
+    //     receiver: receiver.bytes,
+    //   })
+    //   .submit();
+    itxn_begin
+    frame_dig -2
+    itxn_field Receiver
+    frame_dig -1
+    itxn_field Amount
+    // smart_contracts/htlc/contract.algo.ts:68-73
+    // itxn
+    //   .payment({
+    //     amount: amount,
+    //     fee: 0,
+    //     receiver: receiver.bytes,
+    //   })
+    intc_1 // 1
+    itxn_field TypeEnum
+    // smart_contracts/htlc/contract.algo.ts:71
+    // fee: 0,
+    intc_0 // 0
+    itxn_field Fee
+    // smart_contracts/htlc/contract.algo.ts:68-74
+    // itxn
+    //   .payment({
+    //     amount: amount,
+    //     fee: 0,
+    //     receiver: receiver.bytes,
+    //   })
+    //   .submit();
+    itxn_submit
+    retsub
+
+
+// smart_contracts/htlc/contract.algo.ts::Escrow.makeHash(secret: bytes) -> bytes:
+makeHash:
+    // smart_contracts/htlc/contract.algo.ts:83-84
+    // @arc4.abimethod({ readonly: true })
+    // public makeHash(secret: arc4.DynamicBytes): bytes {
+    proto 1 1
+    // smart_contracts/htlc/contract.algo.ts:85
+    // return op.keccak256(secret.bytes);
+    frame_dig -1
+    keccak256
+    retsub
+
+
+// smart_contracts/htlc/contract.algo.ts::Escrow.latestTimestamp() -> uint64:
+latestTimestamp:
+    // smart_contracts/htlc/contract.algo.ts:94
+    // return Global.latestTimestamp;
+    global LatestTimestamp
+    retsub
