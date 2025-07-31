@@ -1,0 +1,1120 @@
+{
+  "version": 3,
+  "sources": [
+    "/home/lukas/CodingProjects/PottiSwap/algorandContracts/projects/algorandContracts/smart_contracts/htlc/auction.algo.ts"
+  ],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AAgBA;;AAAA;;;AAAA;;;;;;;;;;;;;;;;;;;;;;AAAA;;;AAAA;;;;;;;;;;AAAA;;AAgDG;;AAAA;AAAA;AAAA;;AAAA;AAAA;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;;AAVA;;AAAA;AAAA;AAAA;;AAAA;AAAA;;;AAAA;;AAPA;;AAAA;AAAA;AAAA;;AAAA;AAAA;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;;AAfA;;AAAA;AAAA;AAAA;;AAAA;AAhBH;;;AAAA;AAAA;;;AAAA;AAAA;;;AAAA;AAgBG;;;AAAA;;AAhBH;;AAAA;;;AAAA;;AAAA;AAAA;AAAA;;AAgBE;;;AAEE;;AAAA;AACA;;AAAA;AACA;;AAAA;AAEuB;;;AArBlB;;;;;;;;;;;AAqBL;AAAA;AApBK;AAqBL;;AAAA;AApBK;AAqBL;;AAAA;AApBK;AAqBL;;AAAA;AApBK;;;;;;;;;AAqBgC;;AAArC;AApBK;;AAqB8B;;AAAnC;AACuB;;;AArBlB;;AAqBL;AAAA;;AAK4B;;;AA1BvB;AAAA;;AAAA;AAAA;AA0BuB;AA/BvB;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AACA;AAAA;AAAA;AAAA;AA+B0C;AA9B1C;AAAA;AAAA;AAAA;AA8B0F;;AAAA;AAAA;AAAjD;AAAxB;AACtB;AA7BK;;AAkC8B;;AAAnC;;AAUc;;AAAd",
+  "op_pc_offset": 0,
+  "pc_events": {
+    "1": {
+      "subroutine": "@algorandfoundation/algorand-typescript/arc4/index.d.ts::Contract.approvalProgram",
+      "params": {},
+      "block": "main",
+      "stack_in": [],
+      "op": "intcblock 0 1"
+    },
+    "5": {
+      "op": "bytecblock \"startPrice\" 0x151f7c75 \"minPrice\" \"duration\" \"taker\" \"startTime\""
+    },
+    "57": {
+      "op": "txn NumAppArgs",
+      "defined_out": [
+        "tmp%0#1"
+      ],
+      "stack_out": [
+        "tmp%0#1"
+      ]
+    },
+    "59": {
+      "op": "bz main_bare_routing@9",
+      "stack_out": []
+    },
+    "62": {
+      "op": "pushbytess 0x229dc55b 0xd1717fe5 0xe08ef21e 0x64ccd930 // method \"createAuction(uint64,uint64,uint64)void\", method \"getCurrentPrice()uint64\", method \"bid()void\", method \"latestTimestamp()uint64\"",
+      "defined_out": [
+        "Method(bid()void)",
+        "Method(createAuction(uint64,uint64,uint64)void)",
+        "Method(getCurrentPrice()uint64)",
+        "Method(latestTimestamp()uint64)"
+      ],
+      "stack_out": [
+        "Method(createAuction(uint64,uint64,uint64)void)",
+        "Method(getCurrentPrice()uint64)",
+        "Method(bid()void)",
+        "Method(latestTimestamp()uint64)"
+      ]
+    },
+    "84": {
+      "op": "txna ApplicationArgs 0",
+      "defined_out": [
+        "Method(bid()void)",
+        "Method(createAuction(uint64,uint64,uint64)void)",
+        "Method(getCurrentPrice()uint64)",
+        "Method(latestTimestamp()uint64)",
+        "tmp%2#0"
+      ],
+      "stack_out": [
+        "Method(createAuction(uint64,uint64,uint64)void)",
+        "Method(getCurrentPrice()uint64)",
+        "Method(bid()void)",
+        "Method(latestTimestamp()uint64)",
+        "tmp%2#0"
+      ]
+    },
+    "87": {
+      "op": "match main_createAuction_route@3 main_getCurrentPrice_route@4 main_bid_route@5 main_latestTimestamp_route@6",
+      "stack_out": []
+    },
+    "97": {
+      "block": "main_after_if_else@13",
+      "stack_in": [],
+      "op": "intc_0 // 0",
+      "defined_out": [
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0"
+      ]
+    },
+    "98": {
+      "op": "return",
+      "stack_out": []
+    },
+    "99": {
+      "block": "main_latestTimestamp_route@6",
+      "stack_in": [],
+      "op": "txn OnCompletion",
+      "defined_out": [
+        "tmp%19#0"
+      ],
+      "stack_out": [
+        "tmp%19#0"
+      ]
+    },
+    "101": {
+      "op": "!",
+      "defined_out": [
+        "tmp%20#0"
+      ],
+      "stack_out": [
+        "tmp%20#0"
+      ]
+    },
+    "102": {
+      "error": "OnCompletion is not NoOp",
+      "op": "assert // OnCompletion is not NoOp",
+      "stack_out": []
+    },
+    "103": {
+      "op": "txn ApplicationID",
+      "defined_out": [
+        "tmp%21#0"
+      ],
+      "stack_out": [
+        "tmp%21#0"
+      ]
+    },
+    "105": {
+      "error": "can only call when not creating",
+      "op": "assert // can only call when not creating",
+      "stack_out": []
+    },
+    "106": {
+      "callsub": "smart_contracts/htlc/auction.algo.ts::Auction.latestTimestamp",
+      "op": "callsub latestTimestamp",
+      "defined_out": [
+        "to_encode%1#0"
+      ],
+      "stack_out": [
+        "to_encode%1#0"
+      ]
+    },
+    "109": {
+      "op": "itob",
+      "defined_out": [
+        "val_as_bytes%1#0"
+      ],
+      "stack_out": [
+        "val_as_bytes%1#0"
+      ]
+    },
+    "110": {
+      "op": "bytec_1 // 0x151f7c75",
+      "defined_out": [
+        "0x151f7c75",
+        "val_as_bytes%1#0"
+      ],
+      "stack_out": [
+        "val_as_bytes%1#0",
+        "0x151f7c75"
+      ]
+    },
+    "111": {
+      "op": "swap",
+      "stack_out": [
+        "0x151f7c75",
+        "val_as_bytes%1#0"
+      ]
+    },
+    "112": {
+      "op": "concat",
+      "defined_out": [
+        "tmp%23#0"
+      ],
+      "stack_out": [
+        "tmp%23#0"
+      ]
+    },
+    "113": {
+      "op": "log",
+      "stack_out": []
+    },
+    "114": {
+      "op": "intc_1 // 1",
+      "defined_out": [
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0"
+      ]
+    },
+    "115": {
+      "op": "return",
+      "stack_out": []
+    },
+    "116": {
+      "block": "main_bid_route@5",
+      "stack_in": [],
+      "op": "txn OnCompletion",
+      "defined_out": [
+        "tmp%15#0"
+      ],
+      "stack_out": [
+        "tmp%15#0"
+      ]
+    },
+    "118": {
+      "op": "!",
+      "defined_out": [
+        "tmp%16#0"
+      ],
+      "stack_out": [
+        "tmp%16#0"
+      ]
+    },
+    "119": {
+      "error": "OnCompletion is not NoOp",
+      "op": "assert // OnCompletion is not NoOp",
+      "stack_out": []
+    },
+    "120": {
+      "op": "txn ApplicationID",
+      "defined_out": [
+        "tmp%17#0"
+      ],
+      "stack_out": [
+        "tmp%17#0"
+      ]
+    },
+    "122": {
+      "error": "can only call when not creating",
+      "op": "assert // can only call when not creating",
+      "stack_out": []
+    },
+    "123": {
+      "callsub": "smart_contracts/htlc/auction.algo.ts::Auction.bid",
+      "op": "callsub bid"
+    },
+    "126": {
+      "op": "intc_1 // 1",
+      "defined_out": [
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0"
+      ]
+    },
+    "127": {
+      "op": "return",
+      "stack_out": []
+    },
+    "128": {
+      "block": "main_getCurrentPrice_route@4",
+      "stack_in": [],
+      "op": "txn OnCompletion",
+      "defined_out": [
+        "tmp%10#0"
+      ],
+      "stack_out": [
+        "tmp%10#0"
+      ]
+    },
+    "130": {
+      "op": "!",
+      "defined_out": [
+        "tmp%11#0"
+      ],
+      "stack_out": [
+        "tmp%11#0"
+      ]
+    },
+    "131": {
+      "error": "OnCompletion is not NoOp",
+      "op": "assert // OnCompletion is not NoOp",
+      "stack_out": []
+    },
+    "132": {
+      "op": "txn ApplicationID",
+      "defined_out": [
+        "tmp%12#0"
+      ],
+      "stack_out": [
+        "tmp%12#0"
+      ]
+    },
+    "134": {
+      "error": "can only call when not creating",
+      "op": "assert // can only call when not creating",
+      "stack_out": []
+    },
+    "135": {
+      "callsub": "smart_contracts/htlc/auction.algo.ts::Auction.getCurrentPrice",
+      "op": "callsub getCurrentPrice",
+      "defined_out": [
+        "to_encode%0#0"
+      ],
+      "stack_out": [
+        "to_encode%0#0"
+      ]
+    },
+    "138": {
+      "op": "itob",
+      "defined_out": [
+        "val_as_bytes%0#0"
+      ],
+      "stack_out": [
+        "val_as_bytes%0#0"
+      ]
+    },
+    "139": {
+      "op": "bytec_1 // 0x151f7c75",
+      "defined_out": [
+        "0x151f7c75",
+        "val_as_bytes%0#0"
+      ],
+      "stack_out": [
+        "val_as_bytes%0#0",
+        "0x151f7c75"
+      ]
+    },
+    "140": {
+      "op": "swap",
+      "stack_out": [
+        "0x151f7c75",
+        "val_as_bytes%0#0"
+      ]
+    },
+    "141": {
+      "op": "concat",
+      "defined_out": [
+        "tmp%14#0"
+      ],
+      "stack_out": [
+        "tmp%14#0"
+      ]
+    },
+    "142": {
+      "op": "log",
+      "stack_out": []
+    },
+    "143": {
+      "op": "intc_1 // 1",
+      "defined_out": [
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0"
+      ]
+    },
+    "144": {
+      "op": "return",
+      "stack_out": []
+    },
+    "145": {
+      "block": "main_createAuction_route@3",
+      "stack_in": [],
+      "op": "txn OnCompletion",
+      "defined_out": [
+        "tmp%3#0"
+      ],
+      "stack_out": [
+        "tmp%3#0"
+      ]
+    },
+    "147": {
+      "op": "!",
+      "defined_out": [
+        "tmp%4#0"
+      ],
+      "stack_out": [
+        "tmp%4#0"
+      ]
+    },
+    "148": {
+      "error": "OnCompletion is not NoOp",
+      "op": "assert // OnCompletion is not NoOp",
+      "stack_out": []
+    },
+    "149": {
+      "op": "txn ApplicationID",
+      "defined_out": [
+        "tmp%5#0"
+      ],
+      "stack_out": [
+        "tmp%5#0"
+      ]
+    },
+    "151": {
+      "error": "can only call when not creating",
+      "op": "assert // can only call when not creating",
+      "stack_out": []
+    },
+    "152": {
+      "op": "txna ApplicationArgs 1",
+      "defined_out": [
+        "reinterpret_bytes[8]%0#0"
+      ],
+      "stack_out": [
+        "reinterpret_bytes[8]%0#0"
+      ]
+    },
+    "155": {
+      "op": "btoi",
+      "defined_out": [
+        "tmp%7#0"
+      ],
+      "stack_out": [
+        "tmp%7#0"
+      ]
+    },
+    "156": {
+      "op": "txna ApplicationArgs 2",
+      "defined_out": [
+        "reinterpret_bytes[8]%1#0",
+        "tmp%7#0"
+      ],
+      "stack_out": [
+        "tmp%7#0",
+        "reinterpret_bytes[8]%1#0"
+      ]
+    },
+    "159": {
+      "op": "btoi",
+      "defined_out": [
+        "tmp%7#0",
+        "tmp%8#0"
+      ],
+      "stack_out": [
+        "tmp%7#0",
+        "tmp%8#0"
+      ]
+    },
+    "160": {
+      "op": "txna ApplicationArgs 3",
+      "defined_out": [
+        "reinterpret_bytes[8]%2#0",
+        "tmp%7#0",
+        "tmp%8#0"
+      ],
+      "stack_out": [
+        "tmp%7#0",
+        "tmp%8#0",
+        "reinterpret_bytes[8]%2#0"
+      ]
+    },
+    "163": {
+      "op": "btoi",
+      "defined_out": [
+        "tmp%7#0",
+        "tmp%8#0",
+        "tmp%9#0"
+      ],
+      "stack_out": [
+        "tmp%7#0",
+        "tmp%8#0",
+        "tmp%9#0"
+      ]
+    },
+    "164": {
+      "callsub": "smart_contracts/htlc/auction.algo.ts::Auction.createAuction",
+      "op": "callsub createAuction",
+      "stack_out": []
+    },
+    "167": {
+      "op": "intc_1 // 1",
+      "defined_out": [
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0"
+      ]
+    },
+    "168": {
+      "op": "return",
+      "stack_out": []
+    },
+    "169": {
+      "block": "main_bare_routing@9",
+      "stack_in": [],
+      "op": "txn OnCompletion",
+      "defined_out": [
+        "tmp%24#0"
+      ],
+      "stack_out": [
+        "tmp%24#0"
+      ]
+    },
+    "171": {
+      "op": "bnz main_after_if_else@13",
+      "stack_out": []
+    },
+    "174": {
+      "op": "txn ApplicationID",
+      "defined_out": [
+        "tmp%25#0"
+      ],
+      "stack_out": [
+        "tmp%25#0"
+      ]
+    },
+    "176": {
+      "op": "!",
+      "defined_out": [
+        "tmp%26#0"
+      ],
+      "stack_out": [
+        "tmp%26#0"
+      ]
+    },
+    "177": {
+      "error": "can only call when creating",
+      "op": "assert // can only call when creating",
+      "stack_out": []
+    },
+    "178": {
+      "op": "intc_1 // 1",
+      "defined_out": [
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0"
+      ]
+    },
+    "179": {
+      "op": "return",
+      "stack_out": []
+    },
+    "180": {
+      "subroutine": "smart_contracts/htlc/auction.algo.ts::Auction.createAuction",
+      "params": {
+        "startPrice#0": "uint64",
+        "minPrice#0": "uint64",
+        "duration#0": "uint64"
+      },
+      "block": "createAuction",
+      "stack_in": [],
+      "op": "proto 3 0"
+    },
+    "183": {
+      "op": "frame_dig -3",
+      "defined_out": [
+        "startPrice#0 (copy)"
+      ],
+      "stack_out": [
+        "startPrice#0 (copy)"
+      ]
+    },
+    "185": {
+      "error": "Start price must be positive",
+      "op": "assert // Start price must be positive",
+      "stack_out": []
+    },
+    "186": {
+      "op": "frame_dig -2",
+      "defined_out": [
+        "minPrice#0 (copy)"
+      ],
+      "stack_out": [
+        "minPrice#0 (copy)"
+      ]
+    },
+    "188": {
+      "error": "Min price must be positive",
+      "op": "assert // Min price must be positive",
+      "stack_out": []
+    },
+    "189": {
+      "op": "frame_dig -1",
+      "defined_out": [
+        "duration#0 (copy)"
+      ],
+      "stack_out": [
+        "duration#0 (copy)"
+      ]
+    },
+    "191": {
+      "error": "Duration must be positive",
+      "op": "assert // Duration must be positive",
+      "stack_out": []
+    },
+    "192": {
+      "callsub": "smart_contracts/htlc/auction.algo.ts::Auction.latestTimestamp",
+      "op": "callsub latestTimestamp",
+      "defined_out": [
+        "new_state_value%0#0"
+      ],
+      "stack_out": [
+        "new_state_value%0#0"
+      ]
+    },
+    "195": {
+      "op": "pushbytes \"auctionId\"",
+      "defined_out": [
+        "\"auctionId\"",
+        "new_state_value%0#0"
+      ],
+      "stack_out": [
+        "new_state_value%0#0",
+        "\"auctionId\""
+      ]
+    },
+    "206": {
+      "op": "swap",
+      "stack_out": [
+        "\"auctionId\"",
+        "new_state_value%0#0"
+      ]
+    },
+    "207": {
+      "op": "app_global_put",
+      "stack_out": []
+    },
+    "208": {
+      "op": "bytec_0 // \"startPrice\"",
+      "defined_out": [
+        "\"startPrice\""
+      ],
+      "stack_out": [
+        "\"startPrice\""
+      ]
+    },
+    "209": {
+      "op": "frame_dig -3",
+      "stack_out": [
+        "\"startPrice\"",
+        "startPrice#0 (copy)"
+      ]
+    },
+    "211": {
+      "op": "app_global_put",
+      "stack_out": []
+    },
+    "212": {
+      "op": "bytec_2 // \"minPrice\"",
+      "defined_out": [
+        "\"minPrice\""
+      ],
+      "stack_out": [
+        "\"minPrice\""
+      ]
+    },
+    "213": {
+      "op": "frame_dig -2",
+      "stack_out": [
+        "\"minPrice\"",
+        "minPrice#0 (copy)"
+      ]
+    },
+    "215": {
+      "op": "app_global_put",
+      "stack_out": []
+    },
+    "216": {
+      "op": "bytec_3 // \"duration\"",
+      "defined_out": [
+        "\"duration\""
+      ],
+      "stack_out": [
+        "\"duration\""
+      ]
+    },
+    "217": {
+      "op": "frame_dig -1",
+      "stack_out": [
+        "\"duration\"",
+        "duration#0 (copy)"
+      ]
+    },
+    "219": {
+      "op": "app_global_put",
+      "stack_out": []
+    },
+    "220": {
+      "op": "pushbytes \"creator\"",
+      "defined_out": [
+        "\"creator\""
+      ],
+      "stack_out": [
+        "\"creator\""
+      ]
+    },
+    "229": {
+      "op": "txn Sender",
+      "defined_out": [
+        "\"creator\"",
+        "new_state_value%1#0"
+      ],
+      "stack_out": [
+        "\"creator\"",
+        "new_state_value%1#0"
+      ]
+    },
+    "231": {
+      "op": "app_global_put",
+      "stack_out": []
+    },
+    "232": {
+      "op": "bytec 4 // \"taker\"",
+      "defined_out": [
+        "\"taker\""
+      ],
+      "stack_out": [
+        "\"taker\""
+      ]
+    },
+    "234": {
+      "op": "txn Sender",
+      "defined_out": [
+        "\"taker\"",
+        "new_state_value%2#0"
+      ],
+      "stack_out": [
+        "\"taker\"",
+        "new_state_value%2#0"
+      ]
+    },
+    "236": {
+      "op": "app_global_put",
+      "stack_out": []
+    },
+    "237": {
+      "callsub": "smart_contracts/htlc/auction.algo.ts::Auction.latestTimestamp",
+      "op": "callsub latestTimestamp",
+      "defined_out": [
+        "new_state_value%3#0"
+      ],
+      "stack_out": [
+        "new_state_value%3#0"
+      ]
+    },
+    "240": {
+      "op": "bytec 5 // \"startTime\"",
+      "defined_out": [
+        "\"startTime\"",
+        "new_state_value%3#0"
+      ],
+      "stack_out": [
+        "new_state_value%3#0",
+        "\"startTime\""
+      ]
+    },
+    "242": {
+      "op": "swap",
+      "stack_out": [
+        "\"startTime\"",
+        "new_state_value%3#0"
+      ]
+    },
+    "243": {
+      "op": "app_global_put",
+      "stack_out": []
+    },
+    "244": {
+      "retsub": true,
+      "op": "retsub"
+    },
+    "245": {
+      "subroutine": "smart_contracts/htlc/auction.algo.ts::Auction.getCurrentPrice",
+      "params": {},
+      "block": "getCurrentPrice",
+      "stack_in": [],
+      "callsub": "smart_contracts/htlc/auction.algo.ts::Auction.latestTimestamp",
+      "op": "callsub latestTimestamp",
+      "defined_out": [
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0"
+      ]
+    },
+    "248": {
+      "op": "intc_0 // 0",
+      "defined_out": [
+        "0",
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0",
+        "0"
+      ]
+    },
+    "249": {
+      "op": "bytec 5 // \"startTime\"",
+      "defined_out": [
+        "\"startTime\"",
+        "0",
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0",
+        "0",
+        "\"startTime\""
+      ]
+    },
+    "251": {
+      "op": "app_global_get_ex",
+      "defined_out": [
+        "maybe_exists%0#0",
+        "maybe_value%0#0",
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0",
+        "maybe_value%0#0",
+        "maybe_exists%0#0"
+      ]
+    },
+    "252": {
+      "error": "check GlobalState exists",
+      "op": "assert // check GlobalState exists",
+      "stack_out": [
+        "tmp%0#0",
+        "maybe_value%0#0"
+      ]
+    },
+    "253": {
+      "op": "-",
+      "defined_out": [
+        "elapsedTime#0"
+      ],
+      "stack_out": [
+        "elapsedTime#0"
+      ]
+    },
+    "254": {
+      "op": "intc_0 // 0",
+      "stack_out": [
+        "elapsedTime#0",
+        "0"
+      ]
+    },
+    "255": {
+      "op": "bytec_0 // \"startPrice\"",
+      "defined_out": [
+        "\"startPrice\"",
+        "0",
+        "elapsedTime#0"
+      ],
+      "stack_out": [
+        "elapsedTime#0",
+        "0",
+        "\"startPrice\""
+      ]
+    },
+    "256": {
+      "op": "app_global_get_ex",
+      "defined_out": [
+        "elapsedTime#0",
+        "maybe_exists%1#0",
+        "maybe_value%1#0"
+      ],
+      "stack_out": [
+        "elapsedTime#0",
+        "maybe_value%1#0",
+        "maybe_exists%1#0"
+      ]
+    },
+    "257": {
+      "error": "check GlobalState exists",
+      "op": "assert // check GlobalState exists",
+      "stack_out": [
+        "elapsedTime#0",
+        "maybe_value%1#0"
+      ]
+    },
+    "258": {
+      "op": "intc_0 // 0",
+      "stack_out": [
+        "elapsedTime#0",
+        "maybe_value%1#0",
+        "0"
+      ]
+    },
+    "259": {
+      "op": "bytec_0 // \"startPrice\"",
+      "stack_out": [
+        "elapsedTime#0",
+        "maybe_value%1#0",
+        "0",
+        "\"startPrice\""
+      ]
+    },
+    "260": {
+      "op": "app_global_get_ex",
+      "defined_out": [
+        "elapsedTime#0",
+        "maybe_exists%2#0",
+        "maybe_value%1#0",
+        "maybe_value%2#0"
+      ],
+      "stack_out": [
+        "elapsedTime#0",
+        "maybe_value%1#0",
+        "maybe_value%2#0",
+        "maybe_exists%2#0"
+      ]
+    },
+    "261": {
+      "error": "check GlobalState exists",
+      "op": "assert // check GlobalState exists",
+      "stack_out": [
+        "elapsedTime#0",
+        "maybe_value%1#0",
+        "maybe_value%2#0"
+      ]
+    },
+    "262": {
+      "op": "intc_0 // 0",
+      "stack_out": [
+        "elapsedTime#0",
+        "maybe_value%1#0",
+        "maybe_value%2#0",
+        "0"
+      ]
+    },
+    "263": {
+      "op": "bytec_2 // \"minPrice\"",
+      "defined_out": [
+        "\"minPrice\"",
+        "0",
+        "elapsedTime#0",
+        "maybe_value%1#0",
+        "maybe_value%2#0"
+      ],
+      "stack_out": [
+        "elapsedTime#0",
+        "maybe_value%1#0",
+        "maybe_value%2#0",
+        "0",
+        "\"minPrice\""
+      ]
+    },
+    "264": {
+      "op": "app_global_get_ex",
+      "defined_out": [
+        "elapsedTime#0",
+        "maybe_exists%3#0",
+        "maybe_value%1#0",
+        "maybe_value%2#0",
+        "maybe_value%3#0"
+      ],
+      "stack_out": [
+        "elapsedTime#0",
+        "maybe_value%1#0",
+        "maybe_value%2#0",
+        "maybe_value%3#0",
+        "maybe_exists%3#0"
+      ]
+    },
+    "265": {
+      "error": "check GlobalState exists",
+      "op": "assert // check GlobalState exists",
+      "stack_out": [
+        "elapsedTime#0",
+        "maybe_value%1#0",
+        "maybe_value%2#0",
+        "maybe_value%3#0"
+      ]
+    },
+    "266": {
+      "op": "-",
+      "defined_out": [
+        "elapsedTime#0",
+        "maybe_value%1#0",
+        "tmp%1#0"
+      ],
+      "stack_out": [
+        "elapsedTime#0",
+        "maybe_value%1#0",
+        "tmp%1#0"
+      ]
+    },
+    "267": {
+      "op": "intc_0 // 0",
+      "stack_out": [
+        "elapsedTime#0",
+        "maybe_value%1#0",
+        "tmp%1#0",
+        "0"
+      ]
+    },
+    "268": {
+      "op": "bytec_3 // \"duration\"",
+      "defined_out": [
+        "\"duration\"",
+        "0",
+        "elapsedTime#0",
+        "maybe_value%1#0",
+        "tmp%1#0"
+      ],
+      "stack_out": [
+        "elapsedTime#0",
+        "maybe_value%1#0",
+        "tmp%1#0",
+        "0",
+        "\"duration\""
+      ]
+    },
+    "269": {
+      "op": "app_global_get_ex",
+      "defined_out": [
+        "elapsedTime#0",
+        "maybe_exists%4#0",
+        "maybe_value%1#0",
+        "maybe_value%4#0",
+        "tmp%1#0"
+      ],
+      "stack_out": [
+        "elapsedTime#0",
+        "maybe_value%1#0",
+        "tmp%1#0",
+        "maybe_value%4#0",
+        "maybe_exists%4#0"
+      ]
+    },
+    "270": {
+      "error": "check GlobalState exists",
+      "op": "assert // check GlobalState exists",
+      "stack_out": [
+        "elapsedTime#0",
+        "maybe_value%1#0",
+        "tmp%1#0",
+        "maybe_value%4#0"
+      ]
+    },
+    "271": {
+      "op": "uncover 3",
+      "stack_out": [
+        "maybe_value%1#0",
+        "tmp%1#0",
+        "maybe_value%4#0",
+        "elapsedTime#0"
+      ]
+    },
+    "273": {
+      "op": "swap",
+      "stack_out": [
+        "maybe_value%1#0",
+        "tmp%1#0",
+        "elapsedTime#0",
+        "maybe_value%4#0"
+      ]
+    },
+    "274": {
+      "op": "/",
+      "defined_out": [
+        "maybe_value%1#0",
+        "tmp%1#0",
+        "tmp%2#0"
+      ],
+      "stack_out": [
+        "maybe_value%1#0",
+        "tmp%1#0",
+        "tmp%2#0"
+      ]
+    },
+    "275": {
+      "op": "*",
+      "defined_out": [
+        "maybe_value%1#0",
+        "tmp%3#0"
+      ],
+      "stack_out": [
+        "maybe_value%1#0",
+        "tmp%3#0"
+      ]
+    },
+    "276": {
+      "op": "-",
+      "defined_out": [
+        "price#0"
+      ],
+      "stack_out": [
+        "price#0"
+      ]
+    },
+    "277": {
+      "retsub": true,
+      "op": "retsub"
+    },
+    "278": {
+      "subroutine": "smart_contracts/htlc/auction.algo.ts::Auction.bid",
+      "params": {},
+      "block": "bid",
+      "stack_in": [],
+      "op": "bytec 4 // \"taker\"",
+      "defined_out": [
+        "\"taker\""
+      ],
+      "stack_out": [
+        "\"taker\""
+      ]
+    },
+    "280": {
+      "op": "txn Sender",
+      "defined_out": [
+        "\"taker\"",
+        "new_state_value%0#0"
+      ],
+      "stack_out": [
+        "\"taker\"",
+        "new_state_value%0#0"
+      ]
+    },
+    "282": {
+      "op": "app_global_put",
+      "stack_out": []
+    },
+    "283": {
+      "retsub": true,
+      "op": "retsub"
+    },
+    "284": {
+      "subroutine": "smart_contracts/htlc/auction.algo.ts::Auction.latestTimestamp",
+      "params": {},
+      "block": "latestTimestamp",
+      "stack_in": [],
+      "op": "global LatestTimestamp",
+      "defined_out": [
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0"
+      ]
+    },
+    "286": {
+      "retsub": true,
+      "op": "retsub"
+    }
+  }
+}
