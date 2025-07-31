@@ -1,0 +1,696 @@
+{
+  "version": 3,
+  "sources": [
+    "/home/lukas/CodingProjects/PottiSwap/algorandContracts/projects/algorandContracts/smart_contracts/htlc/escrowFactory.algo.ts"
+  ],
+  "mappings": ";;;;;AAiBA;;AAAA;;;AAAA;;;;;;AAAA;;;AAAA;;;;AAAA;;;AASG;;AAAA;AAAA;AAAA;;AAAA;AATH;;AAAA;AAAA;AAAA;AAAA;;AAAA;AAAA;AAAA;AAAA;;;AAAA;AAAA;;;AAAA;;;AASG;;;AAAA;AAAA;;;;;;AAAA;AAAA;AAAA;AAAA;;AATH;;AAAA;;;AAAA;;AAAA;AAAA;AAAA;;AASE;;;AAEoB;;AAAA;;AAAoB;;AAA/B;AAAP;AACkB;;AAAA;;AAAe;;AAA1B;AAAP;AAEkB;;AAAA;;AAAlB;AAKoB;AAIJ;;AAPiB;;;;;;;;AAAA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AAGb;;;;;AAAA;;;AAQpB;AAAA;AAGA;AAIgB;;AADF;;AAAA;;;;;;;;;;;;;;;AAHd;;;;;AAAA;AAQA",
+  "op_pc_offset": 0,
+  "pc_events": {
+    "1": {
+      "subroutine": "@algorandfoundation/algorand-typescript/arc4/index.d.ts::Contract.approvalProgram",
+      "params": {},
+      "block": "main",
+      "stack_in": [],
+      "op": "intcblock 1 6"
+    },
+    "5": {
+      "op": "txn NumAppArgs",
+      "defined_out": [
+        "tmp%0#1"
+      ],
+      "stack_out": [
+        "tmp%0#1"
+      ]
+    },
+    "7": {
+      "op": "bz main_bare_routing@6",
+      "stack_out": []
+    },
+    "10": {
+      "op": "pushbytes 0x6da17187 // method \"createEscrow(pay,uint64,byte[32],address)uint64\"",
+      "defined_out": [
+        "Method(createEscrow(pay,uint64,byte[32],address)uint64)"
+      ],
+      "stack_out": [
+        "Method(createEscrow(pay,uint64,byte[32],address)uint64)"
+      ]
+    },
+    "16": {
+      "op": "txna ApplicationArgs 0",
+      "defined_out": [
+        "Method(createEscrow(pay,uint64,byte[32],address)uint64)",
+        "tmp%2#0"
+      ],
+      "stack_out": [
+        "Method(createEscrow(pay,uint64,byte[32],address)uint64)",
+        "tmp%2#0"
+      ]
+    },
+    "19": {
+      "op": "match main_createEscrow_route@3",
+      "stack_out": []
+    },
+    "23": {
+      "block": "main_after_if_else@10",
+      "stack_in": [],
+      "op": "pushint 0 // 0",
+      "defined_out": [
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0"
+      ]
+    },
+    "25": {
+      "op": "return",
+      "stack_out": []
+    },
+    "26": {
+      "block": "main_createEscrow_route@3",
+      "stack_in": [],
+      "op": "txn OnCompletion",
+      "defined_out": [
+        "tmp%3#0"
+      ],
+      "stack_out": [
+        "tmp%3#0"
+      ]
+    },
+    "28": {
+      "op": "!",
+      "defined_out": [
+        "tmp%4#0"
+      ],
+      "stack_out": [
+        "tmp%4#0"
+      ]
+    },
+    "29": {
+      "error": "OnCompletion is not NoOp",
+      "op": "assert // OnCompletion is not NoOp",
+      "stack_out": []
+    },
+    "30": {
+      "op": "txn ApplicationID",
+      "defined_out": [
+        "tmp%5#0"
+      ],
+      "stack_out": [
+        "tmp%5#0"
+      ]
+    },
+    "32": {
+      "error": "can only call when not creating",
+      "op": "assert // can only call when not creating",
+      "stack_out": []
+    },
+    "33": {
+      "op": "txn GroupIndex",
+      "defined_out": [
+        "tmp%7#0"
+      ],
+      "stack_out": [
+        "tmp%7#0"
+      ]
+    },
+    "35": {
+      "op": "intc_0 // 1",
+      "defined_out": [
+        "1",
+        "tmp%7#0"
+      ],
+      "stack_out": [
+        "tmp%7#0",
+        "1"
+      ]
+    },
+    "36": {
+      "op": "-",
+      "defined_out": [
+        "gtxn_idx%0#0"
+      ],
+      "stack_out": [
+        "gtxn_idx%0#0"
+      ]
+    },
+    "37": {
+      "op": "dup",
+      "defined_out": [
+        "gtxn_idx%0#0",
+        "gtxn_idx%0#0 (copy)"
+      ],
+      "stack_out": [
+        "gtxn_idx%0#0",
+        "gtxn_idx%0#0 (copy)"
+      ]
+    },
+    "38": {
+      "op": "gtxns TypeEnum",
+      "defined_out": [
+        "gtxn_idx%0#0",
+        "gtxn_type%0#0"
+      ],
+      "stack_out": [
+        "gtxn_idx%0#0",
+        "gtxn_type%0#0"
+      ]
+    },
+    "40": {
+      "op": "intc_0 // pay",
+      "defined_out": [
+        "gtxn_idx%0#0",
+        "gtxn_type%0#0",
+        "pay"
+      ],
+      "stack_out": [
+        "gtxn_idx%0#0",
+        "gtxn_type%0#0",
+        "pay"
+      ]
+    },
+    "41": {
+      "op": "==",
+      "defined_out": [
+        "gtxn_idx%0#0",
+        "gtxn_type_matches%0#0"
+      ],
+      "stack_out": [
+        "gtxn_idx%0#0",
+        "gtxn_type_matches%0#0"
+      ]
+    },
+    "42": {
+      "error": "transaction type is pay",
+      "op": "assert // transaction type is pay",
+      "stack_out": [
+        "gtxn_idx%0#0"
+      ]
+    },
+    "43": {
+      "op": "txna ApplicationArgs 1",
+      "defined_out": [
+        "gtxn_idx%0#0",
+        "reinterpret_bytes[8]%0#0"
+      ],
+      "stack_out": [
+        "gtxn_idx%0#0",
+        "reinterpret_bytes[8]%0#0"
+      ]
+    },
+    "46": {
+      "op": "btoi",
+      "defined_out": [
+        "gtxn_idx%0#0",
+        "tmp%8#0"
+      ],
+      "stack_out": [
+        "gtxn_idx%0#0",
+        "tmp%8#0"
+      ]
+    },
+    "47": {
+      "op": "txna ApplicationArgs 2",
+      "defined_out": [
+        "gtxn_idx%0#0",
+        "reinterpret_bytes[32]%0#0",
+        "tmp%8#0"
+      ],
+      "stack_out": [
+        "gtxn_idx%0#0",
+        "tmp%8#0",
+        "reinterpret_bytes[32]%0#0"
+      ]
+    },
+    "50": {
+      "op": "txna ApplicationArgs 3",
+      "defined_out": [
+        "gtxn_idx%0#0",
+        "reinterpret_bytes[32]%0#0",
+        "reinterpret_bytes[32]%1#0",
+        "tmp%8#0"
+      ],
+      "stack_out": [
+        "gtxn_idx%0#0",
+        "tmp%8#0",
+        "reinterpret_bytes[32]%0#0",
+        "reinterpret_bytes[32]%1#0"
+      ]
+    },
+    "53": {
+      "callsub": "smart_contracts/htlc/escrowFactory.algo.ts::EscrowFactory.createEscrow",
+      "op": "callsub createEscrow",
+      "defined_out": [
+        "to_encode%0#0"
+      ],
+      "stack_out": [
+        "to_encode%0#0"
+      ]
+    },
+    "56": {
+      "op": "itob",
+      "defined_out": [
+        "val_as_bytes%0#0"
+      ],
+      "stack_out": [
+        "val_as_bytes%0#0"
+      ]
+    },
+    "57": {
+      "op": "pushbytes 0x151f7c75",
+      "defined_out": [
+        "0x151f7c75",
+        "val_as_bytes%0#0"
+      ],
+      "stack_out": [
+        "val_as_bytes%0#0",
+        "0x151f7c75"
+      ]
+    },
+    "63": {
+      "op": "swap",
+      "stack_out": [
+        "0x151f7c75",
+        "val_as_bytes%0#0"
+      ]
+    },
+    "64": {
+      "op": "concat",
+      "defined_out": [
+        "tmp%9#0"
+      ],
+      "stack_out": [
+        "tmp%9#0"
+      ]
+    },
+    "65": {
+      "op": "log",
+      "stack_out": []
+    },
+    "66": {
+      "op": "intc_0 // 1",
+      "defined_out": [
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0"
+      ]
+    },
+    "67": {
+      "op": "return",
+      "stack_out": []
+    },
+    "68": {
+      "block": "main_bare_routing@6",
+      "stack_in": [],
+      "op": "txn OnCompletion",
+      "defined_out": [
+        "tmp%10#0"
+      ],
+      "stack_out": [
+        "tmp%10#0"
+      ]
+    },
+    "70": {
+      "op": "bnz main_after_if_else@10",
+      "stack_out": []
+    },
+    "73": {
+      "op": "txn ApplicationID",
+      "defined_out": [
+        "tmp%11#0"
+      ],
+      "stack_out": [
+        "tmp%11#0"
+      ]
+    },
+    "75": {
+      "op": "!",
+      "defined_out": [
+        "tmp%12#0"
+      ],
+      "stack_out": [
+        "tmp%12#0"
+      ]
+    },
+    "76": {
+      "error": "can only call when creating",
+      "op": "assert // can only call when creating",
+      "stack_out": []
+    },
+    "77": {
+      "op": "intc_0 // 1",
+      "defined_out": [
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0"
+      ]
+    },
+    "78": {
+      "op": "return",
+      "stack_out": []
+    },
+    "79": {
+      "subroutine": "smart_contracts/htlc/escrowFactory.algo.ts::EscrowFactory.createEscrow",
+      "params": {
+        "txnDeposit#0": "uint64",
+        "timelock#0": "uint64",
+        "secretHash#0": "bytes",
+        "taker#0": "bytes"
+      },
+      "block": "createEscrow",
+      "stack_in": [],
+      "op": "proto 4 1"
+    },
+    "82": {
+      "op": "frame_dig -4",
+      "defined_out": [
+        "txnDeposit#0 (copy)"
+      ],
+      "stack_out": [
+        "txnDeposit#0 (copy)"
+      ]
+    },
+    "84": {
+      "op": "gtxns Receiver",
+      "defined_out": [
+        "tmp%0#0"
+      ],
+      "stack_out": [
+        "tmp%0#0"
+      ]
+    },
+    "86": {
+      "op": "global CurrentApplicationAddress",
+      "defined_out": [
+        "tmp%0#0",
+        "tmp%1#0"
+      ],
+      "stack_out": [
+        "tmp%0#0",
+        "tmp%1#0"
+      ]
+    },
+    "88": {
+      "op": "==",
+      "defined_out": [
+        "tmp%2#0"
+      ],
+      "stack_out": [
+        "tmp%2#0"
+      ]
+    },
+    "89": {
+      "error": "Receiver must be the escrow app",
+      "op": "assert // Receiver must be the escrow app",
+      "stack_out": []
+    },
+    "90": {
+      "op": "frame_dig -4",
+      "stack_out": [
+        "txnDeposit#0 (copy)"
+      ]
+    },
+    "92": {
+      "op": "gtxns Sender",
+      "defined_out": [
+        "tmp%3#0"
+      ],
+      "stack_out": [
+        "tmp%3#0"
+      ]
+    },
+    "94": {
+      "op": "txn Sender",
+      "defined_out": [
+        "tmp%3#0",
+        "tmp%4#0"
+      ],
+      "stack_out": [
+        "tmp%3#0",
+        "tmp%4#0"
+      ]
+    },
+    "96": {
+      "op": "==",
+      "defined_out": [
+        "tmp%5#0"
+      ],
+      "stack_out": [
+        "tmp%5#0"
+      ]
+    },
+    "97": {
+      "error": "Sender of deposit must be the same as the sender of the app call",
+      "op": "assert // Sender of deposit must be the same as the sender of the app call",
+      "stack_out": []
+    },
+    "98": {
+      "op": "frame_dig -4",
+      "stack_out": [
+        "txnDeposit#0 (copy)"
+      ]
+    },
+    "100": {
+      "op": "gtxns Amount",
+      "defined_out": [
+        "tmp%6#0"
+      ],
+      "stack_out": [
+        "tmp%6#0"
+      ]
+    },
+    "102": {
+      "error": "Deposit should be positive number",
+      "op": "assert // Deposit should be positive number",
+      "stack_out": []
+    },
+    "103": {
+      "op": "itxn_begin"
+    },
+    "104": {
+      "op": "global MinTxnFee",
+      "defined_out": [
+        "inner_txn_params%0%%param_Fee_idx_0#0"
+      ],
+      "stack_out": [
+        "inner_txn_params%0%%param_Fee_idx_0#0"
+      ]
+    },
+    "106": {
+      "op": "pushbytes base64(CoEBQw==)",
+      "defined_out": [
+        "CoEBQw==",
+        "inner_txn_params%0%%param_Fee_idx_0#0"
+      ],
+      "stack_out": [
+        "inner_txn_params%0%%param_Fee_idx_0#0",
+        "CoEBQw=="
+      ]
+    },
+    "112": {
+      "op": "itxn_field ClearStateProgramPages",
+      "stack_out": [
+        "inner_txn_params%0%%param_Fee_idx_0#0"
+      ]
+    },
+    "114": {
+      "op": "pushbytes base64(CiACAAEmBgZhbW91bnQKcmVzY3VlVGltZQQVH3x1CnNlY3JldEhhc2gFdGFrZXIHY3JlYXRvcjEbQQCTggUECSP9EwQBDowPBDHyapsE3uE94QRkzNkwNhoAjgUASQA6AC4AEwACIkMxGRREMRhEiAEGFipMULAjQzEZFEQxGEQ2GgGIAOtJFRZXBgJMUCpMULAjQzEZFEQxGESIAKgjQzEZFEQxGEQ2GgGIAHUjQzEZFEQxGEQxFiMJSTgQIxJENhoBFzYaAjYaA4gADSNDMRlA/5IxGBREI0OKBACL/DgHMgoSRIv8OAAxABJEi/w4CChMZyIoZUREiAB8gAtjcmVhdGVkVGltZUxnMgeL/QgpTGcri/5nJwSL/2cnBTEAZ4mKAQCL/4gARyIrZUQSRIgARSIpZUQMRCInBGVEIihlRIgAF4kiKWVEiAArDEQiJwVlRCIoZUSIAAGJigIAsTIAi/6yB4v/sggjshCyAbOJigEBi/8CiTIHiQ==)",
+      "defined_out": [
+        "CiACAAEmBgZhbW91bnQKcmVzY3VlVGltZQQVH3x1CnNlY3JldEhhc2gFdGFrZXIHY3JlYXRvcjEbQQCTggUECSP9EwQBDowPBDHyapsE3uE94QRkzNkwNhoAjgUASQA6AC4AEwACIkMxGRREMRhEiAEGFipMULAjQzEZFEQxGEQ2GgGIAOtJFRZXBgJMUCpMULAjQzEZFEQxGESIAKgjQzEZFEQxGEQ2GgGIAHUjQzEZFEQxGEQxFiMJSTgQIxJENhoBFzYaAjYaA4gADSNDMRlA/5IxGBREI0OKBACL/DgHMgoSRIv8OAAxABJEi/w4CChMZyIoZUREiAB8gAtjcmVhdGVkVGltZUxnMgeL/QgpTGcri/5nJwSL/2cnBTEAZ4mKAQCL/4gARyIrZUQSRIgARSIpZUQMRCInBGVEIihlRIgAF4kiKWVEiAArDEQiJwVlRCIoZUSIAAGJigIAsTIAi/6yB4v/sggjshCyAbOJigEBi/8CiTIHiQ==",
+        "inner_txn_params%0%%param_Fee_idx_0#0"
+      ],
+      "stack_out": [
+        "inner_txn_params%0%%param_Fee_idx_0#0",
+        "CiACAAEmBgZhbW91bnQKcmVzY3VlVGltZQQVH3x1CnNlY3JldEhhc2gFdGFrZXIHY3JlYXRvcjEbQQCTggUECSP9EwQBDowPBDHyapsE3uE94QRkzNkwNhoAjgUASQA6AC4AEwACIkMxGRREMRhEiAEGFipMULAjQzEZFEQxGEQ2GgGIAOtJFRZXBgJMUCpMULAjQzEZFEQxGESIAKgjQzEZFEQxGEQ2GgGIAHUjQzEZFEQxGEQxFiMJSTgQIxJENhoBFzYaAjYaA4gADSNDMRlA/5IxGBREI0OKBACL/DgHMgoSRIv8OAAxABJEi/w4CChMZyIoZUREiAB8gAtjcmVhdGVkVGltZUxnMgeL/QgpTGcri/5nJwSL/2cnBTEAZ4mKAQCL/4gARyIrZUQSRIgARSIpZUQMRCInBGVEIihlRIgAF4kiKWVEiAArDEQiJwVlRCIoZUSIAAGJigIAsTIAi/6yB4v/sggjshCyAbOJigEBi/8CiTIHiQ=="
+      ]
+    },
+    "496": {
+      "op": "itxn_field ApprovalProgramPages",
+      "stack_out": [
+        "inner_txn_params%0%%param_Fee_idx_0#0"
+      ]
+    },
+    "498": {
+      "op": "intc_1 // 6",
+      "defined_out": [
+        "6",
+        "inner_txn_params%0%%param_Fee_idx_0#0"
+      ],
+      "stack_out": [
+        "inner_txn_params%0%%param_Fee_idx_0#0",
+        "6"
+      ]
+    },
+    "499": {
+      "op": "itxn_field TypeEnum",
+      "stack_out": [
+        "inner_txn_params%0%%param_Fee_idx_0#0"
+      ]
+    },
+    "501": {
+      "op": "itxn_field Fee",
+      "stack_out": []
+    },
+    "503": {
+      "op": "itxn_submit"
+    },
+    "504": {
+      "op": "itxn ApplicationID",
+      "defined_out": [
+        "escrowAppId.ApplicationID#0"
+      ],
+      "stack_out": [
+        "escrowAppId.ApplicationID#0"
+      ]
+    },
+    "506": {
+      "op": "dup",
+      "defined_out": [
+        "escrowAppId.ApplicationID#0",
+        "escrowAppId.ApplicationID#0 (copy)"
+      ],
+      "stack_out": [
+        "escrowAppId.ApplicationID#0",
+        "escrowAppId.ApplicationID#0 (copy)"
+      ]
+    },
+    "507": {
+      "error": "Escrow contract creation failed",
+      "op": "assert // Escrow contract creation failed",
+      "stack_out": [
+        "escrowAppId.ApplicationID#0"
+      ]
+    },
+    "508": {
+      "op": "itxn_begin"
+    },
+    "509": {
+      "op": "global MinTxnFee",
+      "defined_out": [
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0"
+      ],
+      "stack_out": [
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0"
+      ]
+    },
+    "511": {
+      "op": "frame_dig -3",
+      "defined_out": [
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0",
+        "timelock#0 (copy)"
+      ],
+      "stack_out": [
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0",
+        "timelock#0 (copy)"
+      ]
+    },
+    "513": {
+      "op": "itob",
+      "defined_out": [
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0",
+        "tmp%9#0"
+      ],
+      "stack_out": [
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0",
+        "tmp%9#0"
+      ]
+    },
+    "514": {
+      "op": "itxn_field ApplicationArgs",
+      "stack_out": [
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0"
+      ]
+    },
+    "516": {
+      "op": "frame_dig -2",
+      "defined_out": [
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0",
+        "secretHash#0 (copy)"
+      ],
+      "stack_out": [
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0",
+        "secretHash#0 (copy)"
+      ]
+    },
+    "518": {
+      "op": "itxn_field ApplicationArgs",
+      "stack_out": [
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0"
+      ]
+    },
+    "520": {
+      "op": "frame_dig -1",
+      "defined_out": [
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0",
+        "taker#0 (copy)"
+      ],
+      "stack_out": [
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0",
+        "taker#0 (copy)"
+      ]
+    },
+    "522": {
+      "op": "itxn_field ApplicationArgs",
+      "stack_out": [
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0"
+      ]
+    },
+    "524": {
+      "op": "dig 1",
+      "stack_out": [
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0",
+        "escrowAppId.ApplicationID#0 (copy)"
+      ]
+    },
+    "526": {
+      "op": "itxn_field ApplicationID",
+      "stack_out": [
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0"
+      ]
+    },
+    "528": {
+      "op": "intc_1 // 6",
+      "stack_out": [
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0",
+        "6"
+      ]
+    },
+    "529": {
+      "op": "itxn_field TypeEnum",
+      "stack_out": [
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0"
+      ]
+    },
+    "531": {
+      "op": "itxn_field Fee",
+      "stack_out": [
+        "escrowAppId.ApplicationID#0"
+      ]
+    },
+    "533": {
+      "op": "itxn_submit"
+    },
+    "534": {
+      "retsub": true,
+      "op": "retsub"
+    }
+  }
+}
