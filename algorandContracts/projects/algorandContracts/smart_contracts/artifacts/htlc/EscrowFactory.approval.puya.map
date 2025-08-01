@@ -3,7 +3,7 @@
   "sources": [
     "/home/lukas/CodingProjects/PottiSwap/algorandContracts/projects/algorandContracts/smart_contracts/htlc/escrowFactory.algo.ts"
   ],
-  "mappings": ";;;;;AAiBA;;AAAA;;;AAAA;;;;;;AAAA;;;AAAA;;;;AAAA;;;AASG;;AAAA;AAAA;AAAA;;AAAA;AATH;;AAAA;AAAA;AAAA;AAAA;;AAAA;AAAA;AAAA;AAAA;;;AAAA;AAAA;;;AAAA;;;AASG;;;AAAA;AAAA;;;;;;AAAA;AAAA;AAAA;AAAA;;AATH;;AAAA;;;AAAA;;AAAA;AAAA;AAAA;;AASE;;;AAEoB;;AAAA;;AAAoB;;AAA/B;AAAP;AACkB;;AAAA;;AAAe;;AAA1B;AAAP;AAEkB;;AAAA;;AAAlB;AAKoB;AAIJ;;AAPiB;;;;;;;;AAAA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AAGb;;;;;AAAA;;;AAQpB;AAAA;AAGA;AAIgB;;AADF;;AAAA;;;;;;;;;;;;;;;AAHd;;;;;AAAA;AAQA",
+  "mappings": ";;;;;;AAiBA;;AAAA;;;AAAA;;;;;;AAAA;;;AAAA;;;;AAAA;;AASG;;AAAA;AAAA;AAAA;;AAAA;AATH;;;AAAA;AAAA;;;AASG;;;AAAA;AAAA;;;;;;AAAA;AAAA;AAAA;AAAA;;AATH;;AAAA;;;AAAA;;AAAA;AAAA;AAAA;;AASE;;;AAEqC;AAAhB;;AAAA;AAAA;AAAA;AAAgB;AACjB;;AAAoB;;AAA/B;AAAP;AADmC;AAEjB;;AAAe;;AAA1B;AAAP;AAFmC;AAIjB;;AAAlB;AAAA;AAKoB;AAIJ;;AAPiB;;;;;;;;AAAA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AAGb;;;;;AAAA;;;AAQpB;AAAA;AACyB;;;AAGN;AAIH;;AADF;;AAAA;AAAmC;;;;;;;;;;;;;;;AAH9B;;;;;AAAA;AASH;AAIA;;;;;;;;;AAJA;;;AAAA;;;AAAA;AAQhB",
   "op_pc_offset": 0,
   "pc_events": {
     "1": {
@@ -11,9 +11,9 @@
       "params": {},
       "block": "main",
       "stack_in": [],
-      "op": "intcblock 1 6"
+      "op": "intcblock 0 1 6"
     },
-    "5": {
+    "6": {
       "op": "txn NumAppArgs",
       "defined_out": [
         "tmp%0#1"
@@ -22,38 +22,38 @@
         "tmp%0#1"
       ]
     },
-    "7": {
+    "8": {
       "op": "bz main_bare_routing@6",
       "stack_out": []
     },
-    "10": {
-      "op": "pushbytes 0x6da17187 // method \"createEscrow(pay,uint64,byte[32],address)uint64\"",
+    "11": {
+      "op": "pushbytes 0x54787c90 // method \"createEscrow(uint64,byte[32])uint64\"",
       "defined_out": [
-        "Method(createEscrow(pay,uint64,byte[32],address)uint64)"
+        "Method(createEscrow(uint64,byte[32])uint64)"
       ],
       "stack_out": [
-        "Method(createEscrow(pay,uint64,byte[32],address)uint64)"
+        "Method(createEscrow(uint64,byte[32])uint64)"
       ]
     },
-    "16": {
+    "17": {
       "op": "txna ApplicationArgs 0",
       "defined_out": [
-        "Method(createEscrow(pay,uint64,byte[32],address)uint64)",
+        "Method(createEscrow(uint64,byte[32])uint64)",
         "tmp%2#0"
       ],
       "stack_out": [
-        "Method(createEscrow(pay,uint64,byte[32],address)uint64)",
+        "Method(createEscrow(uint64,byte[32])uint64)",
         "tmp%2#0"
       ]
     },
-    "19": {
+    "20": {
       "op": "match main_createEscrow_route@3",
       "stack_out": []
     },
-    "23": {
+    "24": {
       "block": "main_after_if_else@10",
       "stack_in": [],
-      "op": "pushint 0 // 0",
+      "op": "intc_0 // 0",
       "defined_out": [
         "tmp%0#0"
       ],
@@ -105,7 +105,16 @@
       "stack_out": []
     },
     "33": {
-      "op": "txn GroupIndex",
+      "op": "txna ApplicationArgs 1",
+      "defined_out": [
+        "reinterpret_bytes[8]%0#0"
+      ],
+      "stack_out": [
+        "reinterpret_bytes[8]%0#0"
+      ]
+    },
+    "36": {
+      "op": "btoi",
       "defined_out": [
         "tmp%7#0"
       ],
@@ -113,130 +122,18 @@
         "tmp%7#0"
       ]
     },
-    "35": {
-      "op": "intc_0 // 1",
+    "37": {
+      "op": "txna ApplicationArgs 2",
       "defined_out": [
-        "1",
+        "reinterpret_bytes[32]%0#0",
         "tmp%7#0"
       ],
       "stack_out": [
         "tmp%7#0",
-        "1"
-      ]
-    },
-    "36": {
-      "op": "-",
-      "defined_out": [
-        "gtxn_idx%0#0"
-      ],
-      "stack_out": [
-        "gtxn_idx%0#0"
-      ]
-    },
-    "37": {
-      "op": "dup",
-      "defined_out": [
-        "gtxn_idx%0#0",
-        "gtxn_idx%0#0 (copy)"
-      ],
-      "stack_out": [
-        "gtxn_idx%0#0",
-        "gtxn_idx%0#0 (copy)"
-      ]
-    },
-    "38": {
-      "op": "gtxns TypeEnum",
-      "defined_out": [
-        "gtxn_idx%0#0",
-        "gtxn_type%0#0"
-      ],
-      "stack_out": [
-        "gtxn_idx%0#0",
-        "gtxn_type%0#0"
-      ]
-    },
-    "40": {
-      "op": "intc_0 // pay",
-      "defined_out": [
-        "gtxn_idx%0#0",
-        "gtxn_type%0#0",
-        "pay"
-      ],
-      "stack_out": [
-        "gtxn_idx%0#0",
-        "gtxn_type%0#0",
-        "pay"
-      ]
-    },
-    "41": {
-      "op": "==",
-      "defined_out": [
-        "gtxn_idx%0#0",
-        "gtxn_type_matches%0#0"
-      ],
-      "stack_out": [
-        "gtxn_idx%0#0",
-        "gtxn_type_matches%0#0"
-      ]
-    },
-    "42": {
-      "error": "transaction type is pay",
-      "op": "assert // transaction type is pay",
-      "stack_out": [
-        "gtxn_idx%0#0"
-      ]
-    },
-    "43": {
-      "op": "txna ApplicationArgs 1",
-      "defined_out": [
-        "gtxn_idx%0#0",
-        "reinterpret_bytes[8]%0#0"
-      ],
-      "stack_out": [
-        "gtxn_idx%0#0",
-        "reinterpret_bytes[8]%0#0"
-      ]
-    },
-    "46": {
-      "op": "btoi",
-      "defined_out": [
-        "gtxn_idx%0#0",
-        "tmp%8#0"
-      ],
-      "stack_out": [
-        "gtxn_idx%0#0",
-        "tmp%8#0"
-      ]
-    },
-    "47": {
-      "op": "txna ApplicationArgs 2",
-      "defined_out": [
-        "gtxn_idx%0#0",
-        "reinterpret_bytes[32]%0#0",
-        "tmp%8#0"
-      ],
-      "stack_out": [
-        "gtxn_idx%0#0",
-        "tmp%8#0",
         "reinterpret_bytes[32]%0#0"
       ]
     },
-    "50": {
-      "op": "txna ApplicationArgs 3",
-      "defined_out": [
-        "gtxn_idx%0#0",
-        "reinterpret_bytes[32]%0#0",
-        "reinterpret_bytes[32]%1#0",
-        "tmp%8#0"
-      ],
-      "stack_out": [
-        "gtxn_idx%0#0",
-        "tmp%8#0",
-        "reinterpret_bytes[32]%0#0",
-        "reinterpret_bytes[32]%1#0"
-      ]
-    },
-    "53": {
+    "40": {
       "callsub": "smart_contracts/htlc/escrowFactory.algo.ts::EscrowFactory.createEscrow",
       "op": "callsub createEscrow",
       "defined_out": [
@@ -246,7 +143,7 @@
         "to_encode%0#0"
       ]
     },
-    "56": {
+    "43": {
       "op": "itob",
       "defined_out": [
         "val_as_bytes%0#0"
@@ -255,7 +152,7 @@
         "val_as_bytes%0#0"
       ]
     },
-    "57": {
+    "44": {
       "op": "pushbytes 0x151f7c75",
       "defined_out": [
         "0x151f7c75",
@@ -266,28 +163,28 @@
         "0x151f7c75"
       ]
     },
-    "63": {
+    "50": {
       "op": "swap",
       "stack_out": [
         "0x151f7c75",
         "val_as_bytes%0#0"
       ]
     },
-    "64": {
+    "51": {
       "op": "concat",
       "defined_out": [
-        "tmp%9#0"
+        "tmp%8#0"
       ],
       "stack_out": [
-        "tmp%9#0"
+        "tmp%8#0"
       ]
     },
-    "65": {
+    "52": {
       "op": "log",
       "stack_out": []
     },
-    "66": {
-      "op": "intc_0 // 1",
+    "53": {
+      "op": "intc_1 // 1",
       "defined_out": [
         "tmp%0#0"
       ],
@@ -295,50 +192,50 @@
         "tmp%0#0"
       ]
     },
-    "67": {
+    "54": {
       "op": "return",
       "stack_out": []
     },
-    "68": {
+    "55": {
       "block": "main_bare_routing@6",
       "stack_in": [],
       "op": "txn OnCompletion",
       "defined_out": [
-        "tmp%10#0"
+        "tmp%9#0"
       ],
       "stack_out": [
-        "tmp%10#0"
+        "tmp%9#0"
       ]
     },
-    "70": {
+    "57": {
       "op": "bnz main_after_if_else@10",
       "stack_out": []
     },
-    "73": {
+    "60": {
       "op": "txn ApplicationID",
       "defined_out": [
-        "tmp%11#0"
+        "tmp%10#0"
       ],
       "stack_out": [
-        "tmp%11#0"
+        "tmp%10#0"
       ]
     },
-    "75": {
+    "62": {
       "op": "!",
       "defined_out": [
-        "tmp%12#0"
+        "tmp%11#0"
       ],
       "stack_out": [
-        "tmp%12#0"
+        "tmp%11#0"
       ]
     },
-    "76": {
+    "63": {
       "error": "can only call when creating",
       "op": "assert // can only call when creating",
       "stack_out": []
     },
-    "77": {
-      "op": "intc_0 // 1",
+    "64": {
+      "op": "intc_1 // 1",
       "defined_out": [
         "tmp%0#0"
       ],
@@ -346,32 +243,70 @@
         "tmp%0#0"
       ]
     },
-    "78": {
+    "65": {
       "op": "return",
       "stack_out": []
     },
-    "79": {
+    "66": {
       "subroutine": "smart_contracts/htlc/escrowFactory.algo.ts::EscrowFactory.createEscrow",
       "params": {
-        "txnDeposit#0": "uint64",
         "timelock#0": "uint64",
-        "secretHash#0": "bytes",
-        "taker#0": "bytes"
+        "secretHash#0": "bytes"
       },
       "block": "createEscrow",
       "stack_in": [],
-      "op": "proto 4 1"
+      "op": "proto 2 1"
     },
-    "82": {
-      "op": "frame_dig -4",
+    "69": {
+      "op": "intc_0 // 0",
       "defined_out": [
-        "txnDeposit#0 (copy)"
+        "0"
       ],
       "stack_out": [
-        "txnDeposit#0 (copy)"
+        "0"
       ]
     },
-    "84": {
+    "70": {
+      "op": "gtxns TypeEnum",
+      "defined_out": [
+        "gtxn_type%0#0"
+      ],
+      "stack_out": [
+        "gtxn_type%0#0"
+      ]
+    },
+    "72": {
+      "op": "intc_1 // pay",
+      "defined_out": [
+        "gtxn_type%0#0",
+        "pay"
+      ],
+      "stack_out": [
+        "gtxn_type%0#0",
+        "pay"
+      ]
+    },
+    "73": {
+      "op": "==",
+      "defined_out": [
+        "gtxn_type_matches%0#0"
+      ],
+      "stack_out": [
+        "gtxn_type_matches%0#0"
+      ]
+    },
+    "74": {
+      "error": "transaction type is pay",
+      "op": "assert // transaction type is pay",
+      "stack_out": []
+    },
+    "75": {
+      "op": "intc_0 // 0",
+      "stack_out": [
+        "0"
+      ]
+    },
+    "76": {
       "op": "gtxns Receiver",
       "defined_out": [
         "tmp%0#0"
@@ -380,7 +315,7 @@
         "tmp%0#0"
       ]
     },
-    "86": {
+    "78": {
       "op": "global CurrentApplicationAddress",
       "defined_out": [
         "tmp%0#0",
@@ -391,7 +326,7 @@
         "tmp%1#0"
       ]
     },
-    "88": {
+    "80": {
       "op": "==",
       "defined_out": [
         "tmp%2#0"
@@ -400,18 +335,18 @@
         "tmp%2#0"
       ]
     },
-    "89": {
+    "81": {
       "error": "Receiver must be the escrow app",
       "op": "assert // Receiver must be the escrow app",
       "stack_out": []
     },
-    "90": {
-      "op": "frame_dig -4",
+    "82": {
+      "op": "intc_0 // 0",
       "stack_out": [
-        "txnDeposit#0 (copy)"
+        "0"
       ]
     },
-    "92": {
+    "83": {
       "op": "gtxns Sender",
       "defined_out": [
         "tmp%3#0"
@@ -420,7 +355,7 @@
         "tmp%3#0"
       ]
     },
-    "94": {
+    "85": {
       "op": "txn Sender",
       "defined_out": [
         "tmp%3#0",
@@ -431,7 +366,7 @@
         "tmp%4#0"
       ]
     },
-    "96": {
+    "87": {
       "op": "==",
       "defined_out": [
         "tmp%5#0"
@@ -440,18 +375,18 @@
         "tmp%5#0"
       ]
     },
-    "97": {
+    "88": {
       "error": "Sender of deposit must be the same as the sender of the app call",
       "op": "assert // Sender of deposit must be the same as the sender of the app call",
       "stack_out": []
     },
-    "98": {
-      "op": "frame_dig -4",
+    "89": {
+      "op": "intc_0 // 0",
       "stack_out": [
-        "txnDeposit#0 (copy)"
+        "0"
       ]
     },
-    "100": {
+    "90": {
       "op": "gtxns Amount",
       "defined_out": [
         "tmp%6#0"
@@ -460,235 +395,411 @@
         "tmp%6#0"
       ]
     },
-    "102": {
-      "error": "Deposit should be positive number",
-      "op": "assert // Deposit should be positive number",
-      "stack_out": []
-    },
-    "103": {
-      "op": "itxn_begin"
-    },
-    "104": {
-      "op": "global MinTxnFee",
+    "92": {
+      "op": "dup",
       "defined_out": [
-        "inner_txn_params%0%%param_Fee_idx_0#0"
+        "tmp%6#0",
+        "tmp%6#0 (copy)"
       ],
       "stack_out": [
+        "tmp%6#0",
+        "tmp%6#0 (copy)"
+      ]
+    },
+    "93": {
+      "error": "Deposit should be positive number",
+      "op": "assert // Deposit should be positive number",
+      "stack_out": [
+        "tmp%6#0"
+      ]
+    },
+    "94": {
+      "op": "itxn_begin"
+    },
+    "95": {
+      "op": "global MinTxnFee",
+      "defined_out": [
+        "inner_txn_params%0%%param_Fee_idx_0#0",
+        "tmp%6#0"
+      ],
+      "stack_out": [
+        "tmp%6#0",
         "inner_txn_params%0%%param_Fee_idx_0#0"
       ]
     },
-    "106": {
+    "97": {
       "op": "pushbytes base64(CoEBQw==)",
       "defined_out": [
         "CoEBQw==",
-        "inner_txn_params%0%%param_Fee_idx_0#0"
+        "inner_txn_params%0%%param_Fee_idx_0#0",
+        "tmp%6#0"
       ],
       "stack_out": [
+        "tmp%6#0",
         "inner_txn_params%0%%param_Fee_idx_0#0",
         "CoEBQw=="
       ]
     },
-    "112": {
+    "103": {
       "op": "itxn_field ClearStateProgramPages",
       "stack_out": [
+        "tmp%6#0",
         "inner_txn_params%0%%param_Fee_idx_0#0"
       ]
     },
-    "114": {
+    "105": {
       "op": "pushbytes base64(CiACAAEmBgZhbW91bnQKcmVzY3VlVGltZQQVH3x1CnNlY3JldEhhc2gFdGFrZXIHY3JlYXRvcjEbQQCTggUECSP9EwQBDowPBDHyapsE3uE94QRkzNkwNhoAjgUASQA6AC4AEwACIkMxGRREMRhEiAEGFipMULAjQzEZFEQxGEQ2GgGIAOtJFRZXBgJMUCpMULAjQzEZFEQxGESIAKgjQzEZFEQxGEQ2GgGIAHUjQzEZFEQxGEQxFiMJSTgQIxJENhoBFzYaAjYaA4gADSNDMRlA/5IxGBREI0OKBACL/DgHMgoSRIv8OAAxABJEi/w4CChMZyIoZUREiAB8gAtjcmVhdGVkVGltZUxnMgeL/QgpTGcri/5nJwSL/2cnBTEAZ4mKAQCL/4gARyIrZUQSRIgARSIpZUQMRCInBGVEIihlRIgAF4kiKWVEiAArDEQiJwVlRCIoZUSIAAGJigIAsTIAi/6yB4v/sggjshCyAbOJigEBi/8CiTIHiQ==)",
       "defined_out": [
         "CiACAAEmBgZhbW91bnQKcmVzY3VlVGltZQQVH3x1CnNlY3JldEhhc2gFdGFrZXIHY3JlYXRvcjEbQQCTggUECSP9EwQBDowPBDHyapsE3uE94QRkzNkwNhoAjgUASQA6AC4AEwACIkMxGRREMRhEiAEGFipMULAjQzEZFEQxGEQ2GgGIAOtJFRZXBgJMUCpMULAjQzEZFEQxGESIAKgjQzEZFEQxGEQ2GgGIAHUjQzEZFEQxGEQxFiMJSTgQIxJENhoBFzYaAjYaA4gADSNDMRlA/5IxGBREI0OKBACL/DgHMgoSRIv8OAAxABJEi/w4CChMZyIoZUREiAB8gAtjcmVhdGVkVGltZUxnMgeL/QgpTGcri/5nJwSL/2cnBTEAZ4mKAQCL/4gARyIrZUQSRIgARSIpZUQMRCInBGVEIihlRIgAF4kiKWVEiAArDEQiJwVlRCIoZUSIAAGJigIAsTIAi/6yB4v/sggjshCyAbOJigEBi/8CiTIHiQ==",
-        "inner_txn_params%0%%param_Fee_idx_0#0"
+        "inner_txn_params%0%%param_Fee_idx_0#0",
+        "tmp%6#0"
       ],
       "stack_out": [
+        "tmp%6#0",
         "inner_txn_params%0%%param_Fee_idx_0#0",
         "CiACAAEmBgZhbW91bnQKcmVzY3VlVGltZQQVH3x1CnNlY3JldEhhc2gFdGFrZXIHY3JlYXRvcjEbQQCTggUECSP9EwQBDowPBDHyapsE3uE94QRkzNkwNhoAjgUASQA6AC4AEwACIkMxGRREMRhEiAEGFipMULAjQzEZFEQxGEQ2GgGIAOtJFRZXBgJMUCpMULAjQzEZFEQxGESIAKgjQzEZFEQxGEQ2GgGIAHUjQzEZFEQxGEQxFiMJSTgQIxJENhoBFzYaAjYaA4gADSNDMRlA/5IxGBREI0OKBACL/DgHMgoSRIv8OAAxABJEi/w4CChMZyIoZUREiAB8gAtjcmVhdGVkVGltZUxnMgeL/QgpTGcri/5nJwSL/2cnBTEAZ4mKAQCL/4gARyIrZUQSRIgARSIpZUQMRCInBGVEIihlRIgAF4kiKWVEiAArDEQiJwVlRCIoZUSIAAGJigIAsTIAi/6yB4v/sggjshCyAbOJigEBi/8CiTIHiQ=="
       ]
     },
-    "496": {
+    "487": {
       "op": "itxn_field ApprovalProgramPages",
       "stack_out": [
+        "tmp%6#0",
         "inner_txn_params%0%%param_Fee_idx_0#0"
       ]
     },
-    "498": {
-      "op": "intc_1 // 6",
+    "489": {
+      "op": "intc_2 // 6",
       "defined_out": [
         "6",
-        "inner_txn_params%0%%param_Fee_idx_0#0"
+        "inner_txn_params%0%%param_Fee_idx_0#0",
+        "tmp%6#0"
       ],
       "stack_out": [
+        "tmp%6#0",
         "inner_txn_params%0%%param_Fee_idx_0#0",
         "6"
       ]
     },
-    "499": {
+    "490": {
       "op": "itxn_field TypeEnum",
       "stack_out": [
+        "tmp%6#0",
         "inner_txn_params%0%%param_Fee_idx_0#0"
       ]
     },
-    "501": {
+    "492": {
       "op": "itxn_field Fee",
-      "stack_out": []
+      "stack_out": [
+        "tmp%6#0"
+      ]
     },
-    "503": {
+    "494": {
       "op": "itxn_submit"
     },
-    "504": {
+    "495": {
       "op": "itxn ApplicationID",
       "defined_out": [
-        "escrowAppId.ApplicationID#0"
+        "escrowAppId.ApplicationID#0",
+        "tmp%6#0"
       ],
       "stack_out": [
+        "tmp%6#0",
         "escrowAppId.ApplicationID#0"
       ]
     },
-    "506": {
+    "497": {
       "op": "dup",
       "defined_out": [
         "escrowAppId.ApplicationID#0",
-        "escrowAppId.ApplicationID#0 (copy)"
+        "escrowAppId.ApplicationID#0 (copy)",
+        "tmp%6#0"
       ],
       "stack_out": [
+        "tmp%6#0",
         "escrowAppId.ApplicationID#0",
         "escrowAppId.ApplicationID#0 (copy)"
       ]
     },
-    "507": {
+    "498": {
       "error": "Escrow contract creation failed",
       "op": "assert // Escrow contract creation failed",
       "stack_out": [
+        "tmp%6#0",
         "escrowAppId.ApplicationID#0"
       ]
     },
-    "508": {
-      "op": "itxn_begin"
-    },
-    "509": {
-      "op": "global MinTxnFee",
+    "499": {
+      "op": "itxna Accounts 0",
       "defined_out": [
+        "escrowAppAddress#0",
         "escrowAppId.ApplicationID#0",
-        "inner_txn_params%1%%param_Fee_idx_0#0"
+        "tmp%6#0"
       ],
       "stack_out": [
+        "tmp%6#0",
         "escrowAppId.ApplicationID#0",
+        "escrowAppAddress#0"
+      ]
+    },
+    "502": {
+      "op": "itxn_begin"
+    },
+    "503": {
+      "op": "global MinTxnFee",
+      "defined_out": [
+        "escrowAppAddress#0",
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0",
+        "tmp%6#0"
+      ],
+      "stack_out": [
+        "tmp%6#0",
+        "escrowAppId.ApplicationID#0",
+        "escrowAppAddress#0",
         "inner_txn_params%1%%param_Fee_idx_0#0"
+      ]
+    },
+    "505": {
+      "op": "frame_dig -2",
+      "defined_out": [
+        "escrowAppAddress#0",
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0",
+        "timelock#0 (copy)",
+        "tmp%6#0"
+      ],
+      "stack_out": [
+        "tmp%6#0",
+        "escrowAppId.ApplicationID#0",
+        "escrowAppAddress#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0",
+        "timelock#0 (copy)"
+      ]
+    },
+    "507": {
+      "op": "itob",
+      "defined_out": [
+        "escrowAppAddress#0",
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0",
+        "tmp%6#0",
+        "tmp%9#0"
+      ],
+      "stack_out": [
+        "tmp%6#0",
+        "escrowAppId.ApplicationID#0",
+        "escrowAppAddress#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0",
+        "tmp%9#0"
+      ]
+    },
+    "508": {
+      "op": "global CurrentApplicationAddress",
+      "defined_out": [
+        "escrowAppAddress#0",
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0",
+        "tmp%10#0",
+        "tmp%6#0",
+        "tmp%9#0"
+      ],
+      "stack_out": [
+        "tmp%6#0",
+        "escrowAppId.ApplicationID#0",
+        "escrowAppAddress#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0",
+        "tmp%9#0",
+        "tmp%10#0"
+      ]
+    },
+    "510": {
+      "op": "swap",
+      "stack_out": [
+        "tmp%6#0",
+        "escrowAppId.ApplicationID#0",
+        "escrowAppAddress#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0",
+        "tmp%10#0",
+        "tmp%9#0"
       ]
     },
     "511": {
-      "op": "frame_dig -3",
-      "defined_out": [
-        "escrowAppId.ApplicationID#0",
-        "inner_txn_params%1%%param_Fee_idx_0#0",
-        "timelock#0 (copy)"
-      ],
+      "op": "itxn_field ApplicationArgs",
       "stack_out": [
+        "tmp%6#0",
         "escrowAppId.ApplicationID#0",
+        "escrowAppAddress#0",
         "inner_txn_params%1%%param_Fee_idx_0#0",
-        "timelock#0 (copy)"
+        "tmp%10#0"
       ]
     },
     "513": {
-      "op": "itob",
-      "defined_out": [
-        "escrowAppId.ApplicationID#0",
-        "inner_txn_params%1%%param_Fee_idx_0#0",
-        "tmp%9#0"
-      ],
-      "stack_out": [
-        "escrowAppId.ApplicationID#0",
-        "inner_txn_params%1%%param_Fee_idx_0#0",
-        "tmp%9#0"
-      ]
-    },
-    "514": {
-      "op": "itxn_field ApplicationArgs",
-      "stack_out": [
-        "escrowAppId.ApplicationID#0",
-        "inner_txn_params%1%%param_Fee_idx_0#0"
-      ]
-    },
-    "516": {
-      "op": "frame_dig -2",
-      "defined_out": [
-        "escrowAppId.ApplicationID#0",
-        "inner_txn_params%1%%param_Fee_idx_0#0",
-        "secretHash#0 (copy)"
-      ],
-      "stack_out": [
-        "escrowAppId.ApplicationID#0",
-        "inner_txn_params%1%%param_Fee_idx_0#0",
-        "secretHash#0 (copy)"
-      ]
-    },
-    "518": {
-      "op": "itxn_field ApplicationArgs",
-      "stack_out": [
-        "escrowAppId.ApplicationID#0",
-        "inner_txn_params%1%%param_Fee_idx_0#0"
-      ]
-    },
-    "520": {
       "op": "frame_dig -1",
       "defined_out": [
+        "escrowAppAddress#0",
         "escrowAppId.ApplicationID#0",
         "inner_txn_params%1%%param_Fee_idx_0#0",
-        "taker#0 (copy)"
+        "secretHash#0 (copy)",
+        "tmp%10#0",
+        "tmp%6#0"
       ],
       "stack_out": [
+        "tmp%6#0",
         "escrowAppId.ApplicationID#0",
+        "escrowAppAddress#0",
         "inner_txn_params%1%%param_Fee_idx_0#0",
-        "taker#0 (copy)"
+        "tmp%10#0",
+        "secretHash#0 (copy)"
       ]
     },
-    "522": {
+    "515": {
       "op": "itxn_field ApplicationArgs",
       "stack_out": [
+        "tmp%6#0",
         "escrowAppId.ApplicationID#0",
+        "escrowAppAddress#0",
+        "inner_txn_params%1%%param_Fee_idx_0#0",
+        "tmp%10#0"
+      ]
+    },
+    "517": {
+      "op": "itxn_field ApplicationArgs",
+      "stack_out": [
+        "tmp%6#0",
+        "escrowAppId.ApplicationID#0",
+        "escrowAppAddress#0",
         "inner_txn_params%1%%param_Fee_idx_0#0"
       ]
     },
-    "524": {
-      "op": "dig 1",
+    "519": {
+      "op": "dig 2",
       "stack_out": [
+        "tmp%6#0",
         "escrowAppId.ApplicationID#0",
+        "escrowAppAddress#0",
         "inner_txn_params%1%%param_Fee_idx_0#0",
         "escrowAppId.ApplicationID#0 (copy)"
       ]
     },
-    "526": {
+    "521": {
       "op": "itxn_field ApplicationID",
       "stack_out": [
+        "tmp%6#0",
         "escrowAppId.ApplicationID#0",
+        "escrowAppAddress#0",
         "inner_txn_params%1%%param_Fee_idx_0#0"
       ]
     },
-    "528": {
-      "op": "intc_1 // 6",
+    "523": {
+      "op": "intc_2 // 6",
       "stack_out": [
+        "tmp%6#0",
         "escrowAppId.ApplicationID#0",
+        "escrowAppAddress#0",
         "inner_txn_params%1%%param_Fee_idx_0#0",
         "6"
       ]
     },
-    "529": {
+    "524": {
       "op": "itxn_field TypeEnum",
       "stack_out": [
+        "tmp%6#0",
         "escrowAppId.ApplicationID#0",
+        "escrowAppAddress#0",
         "inner_txn_params%1%%param_Fee_idx_0#0"
       ]
     },
-    "531": {
+    "526": {
+      "op": "itxn_field Fee",
+      "stack_out": [
+        "tmp%6#0",
+        "escrowAppId.ApplicationID#0",
+        "escrowAppAddress#0"
+      ]
+    },
+    "528": {
+      "op": "itxn_submit"
+    },
+    "529": {
+      "op": "itxn_begin"
+    },
+    "530": {
+      "op": "txn Sender",
+      "defined_out": [
+        "escrowAppAddress#0",
+        "escrowAppId.ApplicationID#0",
+        "inner_txn_params%2%%param_Sender_idx_0#0",
+        "tmp%6#0"
+      ],
+      "stack_out": [
+        "tmp%6#0",
+        "escrowAppId.ApplicationID#0",
+        "escrowAppAddress#0",
+        "inner_txn_params%2%%param_Sender_idx_0#0"
+      ]
+    },
+    "532": {
+      "op": "itxn_field Sender",
+      "stack_out": [
+        "tmp%6#0",
+        "escrowAppId.ApplicationID#0",
+        "escrowAppAddress#0"
+      ]
+    },
+    "534": {
+      "op": "itxn_field Receiver",
+      "stack_out": [
+        "tmp%6#0",
+        "escrowAppId.ApplicationID#0"
+      ]
+    },
+    "536": {
+      "op": "swap",
+      "stack_out": [
+        "escrowAppId.ApplicationID#0",
+        "tmp%6#0"
+      ]
+    },
+    "537": {
+      "op": "itxn_field Amount",
+      "stack_out": [
+        "escrowAppId.ApplicationID#0"
+      ]
+    },
+    "539": {
+      "op": "intc_1 // 1",
+      "defined_out": [
+        "1",
+        "escrowAppId.ApplicationID#0"
+      ],
+      "stack_out": [
+        "escrowAppId.ApplicationID#0",
+        "1"
+      ]
+    },
+    "540": {
+      "op": "itxn_field TypeEnum",
+      "stack_out": [
+        "escrowAppId.ApplicationID#0"
+      ]
+    },
+    "542": {
+      "op": "intc_0 // 0",
+      "stack_out": [
+        "escrowAppId.ApplicationID#0",
+        "0"
+      ]
+    },
+    "543": {
       "op": "itxn_field Fee",
       "stack_out": [
         "escrowAppId.ApplicationID#0"
       ]
     },
-    "533": {
+    "545": {
       "op": "itxn_submit"
     },
-    "534": {
+    "546": {
       "retsub": true,
       "op": "retsub"
     }

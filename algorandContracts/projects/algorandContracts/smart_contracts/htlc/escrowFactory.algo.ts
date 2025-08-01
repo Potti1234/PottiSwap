@@ -25,7 +25,8 @@ export class EscrowFactory extends Contract {
    * @param taker Creator of the escrow (Factory) can set taker address to the resolver address after it is know who won the auction
    */
   @arc4.abimethod()
-  public createEscrow(txnDeposit: gtxn.PaymentTxn, timelock: uint64, secretHash: arc4.StaticBytes<32>, taker: Address): uint64 {
+  public createEscrow(timelock: uint64, secretHash: arc4.StaticBytes<32>): uint64 {
+    const txnDeposit = gtxn.PaymentTxn(0);
     assert(txnDeposit.receiver === Global.currentApplicationAddress, "Receiver must be the escrow app");
     assert(txnDeposit.sender === Txn.sender, "Sender of deposit must be the same as the sender of the app call");
 
@@ -43,13 +44,23 @@ export class EscrowFactory extends Contract {
       .submit();
 
     assert(escrowAppId.appId.id > 0, "Escrow contract creation failed");
+    const escrowAppAddress = escrowAppId.accounts(0);
 
-    // Create escrow
-    itxn
+    // Create escrow with taker as the factory address to change after the auction is over
+    const escrowCall = itxn
       .applicationCall({
         appId: escrowAppId.appId.id,
-        appArgs: [timelock, secretHash.bytes, taker.bytes],
+        appArgs: [timelock, secretHash.bytes, Global.currentApplicationAddress.bytes],
         fee: Global.minTxnFee,
+      })
+      .submit();
+
+    // Send deposit to escrow
+    const deposit = itxn
+      .payment({
+        amount: txnDeposit.amount,
+        receiver: escrowAppAddress,
+        sender: Txn.sender,
       })
       .submit();
 
