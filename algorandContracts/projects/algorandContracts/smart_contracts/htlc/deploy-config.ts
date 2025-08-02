@@ -15,11 +15,11 @@ export async function deploy() {
 
 export async function testCompleteFlow() {
   const algorand = AlgorandClient.fromEnvironment();
-  const relayer = await algorand.account.fromEnvironment("RELAYER23456");
+  const relayer = await algorand.account.fromEnvironment("RELAYER234567");
 
-  const maker = await algorand.account.fromEnvironment("MAKER23456");
-  const resolver1 = await algorand.account.fromEnvironment("RESOLVER123456");
-  const resolver2 = await algorand.account.fromEnvironment("RESOLVER223456");
+  const maker = await algorand.account.fromEnvironment("MAKER234567");
+  const resolver1 = await algorand.account.fromEnvironment("RESOLVER1234567");
+  const resolver2 = await algorand.account.fromEnvironment("RESOLVER2234567");
 
   const escrowFactory = algorand.client.getTypedAppFactory(EscrowFactory, {
     defaultSender: relayer.addr,

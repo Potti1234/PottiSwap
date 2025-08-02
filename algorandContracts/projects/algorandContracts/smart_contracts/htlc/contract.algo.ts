@@ -1,18 +1,31 @@
-import { arc4, assert, bytes, Contract, Global, GlobalState, gtxn, itxn, op, Txn, uint64 } from "@algorandfoundation/algorand-typescript";
-import { Address } from "@algorandfoundation/algorand-typescript/arc4";
+import {
+  arc4,
+  assert,
+  BoxMap,
+  bytes,
+  Contract,
+  Global,
+  GlobalState,
+  gtxn,
+  itxn,
+  op,
+  Txn,
+  uint64,
+} from "@algorandfoundation/algorand-typescript";
+import { Address, UintN64 } from "@algorandfoundation/algorand-typescript/arc4";
 
-interface EscrowInstance {
-  createdTime: uint64;
-  rescueTime: uint64;
-  amount: uint64;
+export class EscrowInstance extends arc4.Struct<{
+  createdTime: UintN64;
+  rescueTime: UintN64;
+  amount: UintN64;
   creator: Address;
   taker: Address;
   secretHash: arc4.StaticBytes<32>;
-  active: boolean;
-}
+  active: UintN64;
+}> {}
 
 export class Escrow extends Contract {
-  public escrowInstances = GlobalState<EscrowInstance[]>({ initialValue: [] });
+  public escrowInstances = BoxMap<uint64, EscrowInstance>({ keyPrefix: "escrowInstances" });
   public escrowInstancesAmount = GlobalState<uint64>({ initialValue: 0 });
 
   /**
@@ -25,17 +38,17 @@ export class Escrow extends Contract {
    */
   @arc4.abimethod()
   public create(timelock: uint64, secretHash: arc4.StaticBytes<32>, taker: Address, txnDeposit: gtxn.PaymentTxn): uint64 {
-    const newEscrowInstance: EscrowInstance = {
-      createdTime: this.latestTimestamp(),
-      rescueTime: Global.latestTimestamp + timelock,
-      amount: txnDeposit.amount,
+    const newEscrowInstance = new EscrowInstance({
+      createdTime: new UintN64(this.latestTimestamp()),
+      rescueTime: new UintN64(Global.latestTimestamp + timelock),
+      amount: new UintN64(txnDeposit.amount),
       creator: new Address(txnDeposit.sender),
       taker: taker,
       secretHash: secretHash,
-      active: true,
-    };
+      active: new UintN64(1),
+    });
 
-    this.escrowInstances.value = [...this.escrowInstances.value, newEscrowInstance];
+    this.escrowInstances(this.escrowInstancesAmount.value).value = newEscrowInstance.copy();
 
     this.escrowInstancesAmount.value++;
 
@@ -49,14 +62,14 @@ export class Escrow extends Contract {
    */
   @arc4.abimethod()
   public withdraw(secret: arc4.StaticBytes<32>, escrowId: uint64) {
-    const escrowInstance = this.escrowInstances.value[escrowId];
+    const escrowInstance = this.escrowInstances(escrowId).value.copy();
 
     assert(this.makeHash(secret) === escrowInstance.secretHash.bytes, "The password is not correct");
 
-    assert(this.latestTimestamp() < escrowInstance.rescueTime, "Escrow can be redeemed with password up to the rescue time");
+    assert(this.latestTimestamp() < escrowInstance.rescueTime.native, "Escrow can be redeemed with password up to the rescue time");
 
     // send payment to the taker
-    this._send(escrowInstance.taker, escrowInstance.amount);
+    this._send(escrowInstance.taker, escrowInstance.amount.native);
   }
   /**
    * After timelock runs out refund to original sender
@@ -65,12 +78,12 @@ export class Escrow extends Contract {
    */
   @arc4.abimethod()
   public cancel(escrowId: uint64) {
-    const escrowInstance = this.escrowInstances.value[escrowId];
+    const escrowInstance = this.escrowInstances(escrowId).value.copy();
 
-    assert(this.latestTimestamp() > escrowInstance.rescueTime, "The escrow cannot be canceled yet");
+    assert(this.latestTimestamp() > escrowInstance.rescueTime.native, "The escrow cannot be canceled yet");
 
     // send payment to the creator
-    this._send(escrowInstance.creator, escrowInstance.amount);
+    this._send(escrowInstance.creator, escrowInstance.amount.native);
   }
 
   /**
