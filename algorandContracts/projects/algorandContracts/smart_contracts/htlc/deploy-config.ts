@@ -1,6 +1,7 @@
 import { AlgorandClient } from "@algorandfoundation/algokit-utils";
-import { EscrowClient, EscrowFactory } from "../artifacts/htlc/EscrowClient";
+import { EscrowFactory } from "../artifacts/htlc/EscrowClient";
 import { ResolverFactory } from "../artifacts/htlc/ResolverClient";
+import { AuctionFactory } from "../artifacts/htlc/AuctionClient";
 import { keccak256, getBytes } from "ethers";
 import { hexToBytes } from "algosdk";
 
@@ -15,13 +16,25 @@ export async function deploy() {
 
 export async function testCompleteFlow() {
   const algorand = AlgorandClient.fromEnvironment();
-  const relayer = await algorand.account.fromEnvironment("RELAYER234567");
+  const relayer = await algorand.account.fromEnvironment("RELAYER23456789");
 
-  const maker = await algorand.account.fromEnvironment("MAKER234567");
-  const resolver1 = await algorand.account.fromEnvironment("RESOLVER1234567");
-  const resolver2 = await algorand.account.fromEnvironment("RESOLVER2234567");
+  const maker = await algorand.account.fromEnvironment("MAKER23456789");
+  const resolver1 = await algorand.account.fromEnvironment("RESOLVER123456789");
+  const resolver2 = await algorand.account.fromEnvironment("RESOLVER223456789");
+
+  let makerInfo = await algorand.account.getInformation(maker.addr);
+  let resolver1Info = await algorand.account.getInformation(resolver1.addr);
+  let resolver2Info = await algorand.account.getInformation(resolver2.addr);
+
+  console.log("Maker Holdings: ", makerInfo.balance);
+  console.log("Resolver1 Holding: ", resolver1Info.balance);
+  console.log("Resolver2 Holding: ", resolver2Info.balance);
 
   const escrowFactory = algorand.client.getTypedAppFactory(EscrowFactory, {
+    defaultSender: relayer.addr,
+  });
+
+  const auctionFactory = algorand.client.getTypedAppFactory(AuctionFactory, {
     defaultSender: relayer.addr,
   });
 
@@ -43,6 +56,11 @@ export async function testCompleteFlow() {
   });
 
   const { appClient: escrowAppClient, result: escrowResult } = await escrowFactory.deploy({
+    onUpdate: "replace",
+    onSchemaBreak: "replace",
+  });
+
+  const { appClient: auctionAppClient, result: auctionResult } = await auctionFactory.deploy({
     onUpdate: "replace",
     onSchemaBreak: "replace",
   });
@@ -73,6 +91,14 @@ export async function testCompleteFlow() {
     });
   }
 
+  if (["create", "replace"].includes(auctionResult.operationPerformed)) {
+    await algorand.send.payment({
+      amount: (2).algo(),
+      sender: relayer.addr,
+      receiver: auctionAppClient.appAddress,
+    });
+  }
+
   // maker generates secret
   const secret = crypto.getRandomValues(new Uint8Array(32));
   const secretHash = hexToBytes(keccak256(secret).slice(2));
@@ -100,11 +126,35 @@ export async function testCompleteFlow() {
     signer: maker.signer,
   });
 
+  makerInfo = await algorand.account.getInformation(maker.addr);
   console.log("Escrow: ", escrow);
+  console.log("Maker Holdings after escrow: ", makerInfo.balance);
 
   //Relayer creates Auction with whitelisted resolvers
+  const auction = await auctionAppClient.send.createAuction({
+    args: {
+      startPrice: 2,
+      minPrice: 1,
+      duration: 120,
+      escrowId: 0,
+      escrowAppId: escrowAppClient.appId,
+    },
+    sender: relayer.addr,
+    signer: relayer.signer,
+  });
+
+  console.log("Auction: ", auction);
 
   //Resolver bids on Auction
+  const bid = await auctionAppClient.send.bid({
+    args: {
+      auctionId: 0,
+    },
+    sender: resolver1.addr,
+    signer: resolver1.signer,
+  });
+
+  console.log("Bid: ", bid);
 
   //Resolver creates Escrow based on Auction price
   const resolver1Deposit = await algorand.send.payment({
@@ -126,7 +176,9 @@ export async function testCompleteFlow() {
     signer: resolver1.signer,
   });
 
+  resolver1Info = await algorand.account.getInformation(resolver1.addr);
   console.log("Resolver1 Escrow: ", resolver1Escrow);
+  console.log("Resolver1 Holdings after escrow: ", resolver1Info.balance);
 
   //Relayer validates both escrows (here all same file)
 
@@ -148,6 +200,8 @@ export async function testCompleteFlow() {
   });
 
   console.log("Escrow Resolver1 Claim: ", escrowResolver1Claim);
+  resolver1Info = await algorand.account.getInformation(resolver1.addr);
+  console.log("Resolver1 Holdings after claim: ", resolver1Info.balance);
 
   const escrowMakerClaim = await escrowAppClient.createTransaction.withdraw({
     args: {
@@ -159,6 +213,8 @@ export async function testCompleteFlow() {
   });
 
   console.log("Escrow Maker Claim: ", escrowMakerClaim);
+  makerInfo = await algorand.account.getInformation(maker.addr);
+  console.log("Maker Holdings after claim: ", makerInfo.balance);
 }
 
 export async function testContractWithFactory() {

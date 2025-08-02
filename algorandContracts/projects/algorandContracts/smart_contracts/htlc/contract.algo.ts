@@ -21,7 +21,6 @@ export class EscrowInstance extends arc4.Struct<{
   creator: Address;
   taker: Address;
   secretHash: arc4.StaticBytes<32>;
-  active: UintN64;
 }> {}
 
 export class Escrow extends Contract {
@@ -45,14 +44,13 @@ export class Escrow extends Contract {
       creator: new Address(txnDeposit.sender),
       taker: taker,
       secretHash: secretHash,
-      active: new UintN64(1),
     });
 
     this.escrowInstances(this.escrowInstancesAmount.value).value = newEscrowInstance.copy();
 
     this.escrowInstancesAmount.value++;
 
-    return this.escrowInstancesAmount.value;
+    return this.escrowInstancesAmount.value - 1;
   }
 
   /**
@@ -64,14 +62,11 @@ export class Escrow extends Contract {
   public withdraw(secret: arc4.StaticBytes<32>, escrowId: uint64) {
     const escrowInstance = this.escrowInstances(escrowId).value.copy();
 
-    assert(escrowInstance.active.native === 1, "Escrow is not active");
-
     assert(this.makeHash(secret) === escrowInstance.secretHash.bytes, "The password is not correct");
 
     assert(this.latestTimestamp() < escrowInstance.rescueTime.native, "Escrow can be redeemed with password up to the rescue time");
 
-    escrowInstance.active = new UintN64(0);
-    this.escrowInstances(escrowId).value = escrowInstance.copy();
+    this.escrowInstances(escrowId).delete();
 
     // send payment to the taker
     this._send(escrowInstance.taker, escrowInstance.amount.native);
@@ -85,12 +80,9 @@ export class Escrow extends Contract {
   public cancel(escrowId: uint64) {
     const escrowInstance = this.escrowInstances(escrowId).value.copy();
 
-    assert(escrowInstance.active.native === 1, "Escrow is not active");
-
     assert(this.latestTimestamp() > escrowInstance.rescueTime.native, "The escrow cannot be canceled yet");
 
-    escrowInstance.active = new UintN64(0);
-    this.escrowInstances(escrowId).value = escrowInstance.copy();
+    this.escrowInstances(escrowId).delete();
 
     // send payment to the creator
     this._send(escrowInstance.creator, escrowInstance.amount.native);
