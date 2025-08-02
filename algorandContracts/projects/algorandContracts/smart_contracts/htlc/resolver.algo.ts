@@ -28,13 +28,24 @@ export class Resolver extends Contract {
   }
 
   @arc4.abimethod()
-  public deployEscrow(txnDeposit: gtxn.PaymentTxn, timelock: uint64, secretHash: arc4.StaticBytes<32>, taker: Address): uint64 {
+  public deployEscrow(timelock: uint64, secretHash: arc4.StaticBytes<32>, taker: Address): uint64 {
+    const deposit = gtxn.PaymentTxn(0);
+
     const factoryAppId = this.factoryAppId.value;
     const escrowAppId = itxn
       .applicationCall({
         appId: factoryAppId,
         appArgs: [timelock, secretHash, taker],
         fee: Global.minTxnFee,
+      })
+      .submit();
+
+    // Send deposit to escrow
+    itxn
+      .payment({
+        amount: deposit.amount,
+        receiver: escrowAppId.accounts(0),
+        sender: Global.currentApplicationAddress,
       })
       .submit();
 

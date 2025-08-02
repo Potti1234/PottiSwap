@@ -3,24 +3,24 @@
 
 // @algorandfoundation/algorand-typescript/arc4/index.d.ts::Contract.approvalProgram() -> uint64:
 main:
-    intcblock 1 0 6
+    intcblock 0 1 6
     bytecblock "factoryAppId"
     // smart_contracts/htlc/resolver.algo.ts:17
     // export class Resolver extends Contract {
     txn NumAppArgs
     bz main_bare_routing@8
-    pushbytess 0x1683a4fc 0xc82f6203 0xac5cd178 // method "createResolver(uint64)void", method "deployEscrow(pay,uint64,byte[32],address)uint64", method "claimEscrow(byte[32])void"
+    pushbytess 0x1683a4fc 0x61829032 0xac5cd178 // method "createResolver(uint64)void", method "deployEscrow(uint64,byte[32],address)uint64", method "claimEscrow(byte[32])void"
     txna ApplicationArgs 0
     match main_createResolver_route@3 main_deployEscrow_route@4 main_claimEscrow_route@5
 
 main_after_if_else@12:
     // smart_contracts/htlc/resolver.algo.ts:17
     // export class Resolver extends Contract {
-    intc_1 // 0
+    intc_0 // 0
     return
 
 main_claimEscrow_route@5:
-    // smart_contracts/htlc/resolver.algo.ts:44
+    // smart_contracts/htlc/resolver.algo.ts:55
     // @arc4.abimethod()
     txn OnCompletion
     !
@@ -30,10 +30,10 @@ main_claimEscrow_route@5:
     // smart_contracts/htlc/resolver.algo.ts:17
     // export class Resolver extends Contract {
     txna ApplicationArgs 1
-    // smart_contracts/htlc/resolver.algo.ts:44
+    // smart_contracts/htlc/resolver.algo.ts:55
     // @arc4.abimethod()
     callsub claimEscrow
-    intc_0 // 1
+    intc_1 // 1
     return
 
 main_deployEscrow_route@4:
@@ -46,14 +46,6 @@ main_deployEscrow_route@4:
     assert // can only call when not creating
     // smart_contracts/htlc/resolver.algo.ts:17
     // export class Resolver extends Contract {
-    txn GroupIndex
-    intc_0 // 1
-    -
-    dup
-    gtxns TypeEnum
-    intc_0 // pay
-    ==
-    assert // transaction type is pay
     txna ApplicationArgs 1
     btoi
     txna ApplicationArgs 2
@@ -66,7 +58,7 @@ main_deployEscrow_route@4:
     swap
     concat
     log
-    intc_0 // 1
+    intc_1 // 1
     return
 
 main_createResolver_route@3:
@@ -84,7 +76,7 @@ main_createResolver_route@3:
     // smart_contracts/htlc/resolver.algo.ts:25
     // @arc4.abimethod()
     callsub createResolver
-    intc_0 // 1
+    intc_1 // 1
     return
 
 main_bare_routing@8:
@@ -95,7 +87,7 @@ main_bare_routing@8:
     txn ApplicationID
     !
     assert // can only call when creating
-    intc_0 // 1
+    intc_1 // 1
     return
 
 
@@ -115,19 +107,26 @@ createResolver:
     retsub
 
 
-// smart_contracts/htlc/resolver.algo.ts::Resolver.deployEscrow(txnDeposit: uint64, timelock: uint64, secretHash: bytes, taker: bytes) -> uint64:
+// smart_contracts/htlc/resolver.algo.ts::Resolver.deployEscrow(timelock: uint64, secretHash: bytes, taker: bytes) -> uint64:
 deployEscrow:
     // smart_contracts/htlc/resolver.algo.ts:30-31
     // @arc4.abimethod()
-    // public deployEscrow(txnDeposit: gtxn.PaymentTxn, timelock: uint64, secretHash: arc4.StaticBytes<32>, taker: Address): uint64 {
-    proto 4 1
+    // public deployEscrow(timelock: uint64, secretHash: arc4.StaticBytes<32>, taker: Address): uint64 {
+    proto 3 1
+    // smart_contracts/htlc/resolver.algo.ts:32
+    // const deposit = gtxn.PaymentTxn(0);
+    intc_0 // 0
+    gtxns TypeEnum
+    intc_1 // pay
+    ==
+    assert // transaction type is pay
     // smart_contracts/htlc/resolver.algo.ts:18
     // public factoryAppId = GlobalState<uint64>();
-    intc_1 // 0
+    intc_0 // 0
     bytec_0 // "factoryAppId"
     app_global_get_ex
     assert // check GlobalState exists
-    // smart_contracts/htlc/resolver.algo.ts:33-39
+    // smart_contracts/htlc/resolver.algo.ts:35-41
     // const escrowAppId = itxn
     //   .applicationCall({
     //     appId: factoryAppId,
@@ -136,10 +135,10 @@ deployEscrow:
     //   })
     //   .submit();
     itxn_begin
-    // smart_contracts/htlc/resolver.algo.ts:37
+    // smart_contracts/htlc/resolver.algo.ts:39
     // fee: Global.minTxnFee,
     global MinTxnFee
-    // smart_contracts/htlc/resolver.algo.ts:36
+    // smart_contracts/htlc/resolver.algo.ts:38
     // appArgs: [timelock, secretHash, taker],
     frame_dig -3
     itob
@@ -150,7 +149,7 @@ deployEscrow:
     itxn_field ApplicationArgs
     swap
     itxn_field ApplicationID
-    // smart_contracts/htlc/resolver.algo.ts:33-38
+    // smart_contracts/htlc/resolver.algo.ts:35-40
     // const escrowAppId = itxn
     //   .applicationCall({
     //     appId: factoryAppId,
@@ -160,7 +159,7 @@ deployEscrow:
     intc_2 // 6
     itxn_field TypeEnum
     itxn_field Fee
-    // smart_contracts/htlc/resolver.algo.ts:33-39
+    // smart_contracts/htlc/resolver.algo.ts:35-41
     // const escrowAppId = itxn
     //   .applicationCall({
     //     appId: factoryAppId,
@@ -170,24 +169,68 @@ deployEscrow:
     //   .submit();
     itxn_submit
     itxn ApplicationID
-    // smart_contracts/htlc/resolver.algo.ts:41
+    // smart_contracts/htlc/resolver.algo.ts:44-50
+    // itxn
+    //   .payment({
+    //     amount: deposit.amount,
+    //     receiver: escrowAppId.accounts(0),
+    //     sender: Global.currentApplicationAddress,
+    //   })
+    //   .submit();
+    itxn_begin
+    // smart_contracts/htlc/resolver.algo.ts:32
+    // const deposit = gtxn.PaymentTxn(0);
+    intc_0 // 0
+    // smart_contracts/htlc/resolver.algo.ts:46
+    // amount: deposit.amount,
+    gtxns Amount
+    // smart_contracts/htlc/resolver.algo.ts:47
+    // receiver: escrowAppId.accounts(0),
+    itxna Accounts 0
+    // smart_contracts/htlc/resolver.algo.ts:48
+    // sender: Global.currentApplicationAddress,
+    global CurrentApplicationAddress
+    itxn_field Sender
+    itxn_field Receiver
+    itxn_field Amount
+    // smart_contracts/htlc/resolver.algo.ts:44-49
+    // itxn
+    //   .payment({
+    //     amount: deposit.amount,
+    //     receiver: escrowAppId.accounts(0),
+    //     sender: Global.currentApplicationAddress,
+    //   })
+    intc_1 // 1
+    itxn_field TypeEnum
+    intc_0 // 0
+    itxn_field Fee
+    // smart_contracts/htlc/resolver.algo.ts:44-50
+    // itxn
+    //   .payment({
+    //     amount: deposit.amount,
+    //     receiver: escrowAppId.accounts(0),
+    //     sender: Global.currentApplicationAddress,
+    //   })
+    //   .submit();
+    itxn_submit
+    // smart_contracts/htlc/resolver.algo.ts:52
     // return escrowAppId.appId.id;
     retsub
 
 
 // smart_contracts/htlc/resolver.algo.ts::Resolver.claimEscrow(secret: bytes) -> void:
 claimEscrow:
-    // smart_contracts/htlc/resolver.algo.ts:44-45
+    // smart_contracts/htlc/resolver.algo.ts:55-56
     // @arc4.abimethod()
     // public claimEscrow(secret: arc4.StaticBytes<32>): void {
     proto 1 0
     // smart_contracts/htlc/resolver.algo.ts:18
     // public factoryAppId = GlobalState<uint64>();
-    intc_1 // 0
+    intc_0 // 0
     bytec_0 // "factoryAppId"
     app_global_get_ex
     assert // check GlobalState exists
-    // smart_contracts/htlc/resolver.algo.ts:48-54
+    // smart_contracts/htlc/resolver.algo.ts:59-65
     // itxn
     //   .applicationCall({
     //     appId: factoryAppId,
@@ -196,14 +239,14 @@ claimEscrow:
     //   })
     //   .submit();
     itxn_begin
-    // smart_contracts/htlc/resolver.algo.ts:52
+    // smart_contracts/htlc/resolver.algo.ts:63
     // fee: Global.minTxnFee,
     global MinTxnFee
     frame_dig -1
     itxn_field ApplicationArgs
     swap
     itxn_field ApplicationID
-    // smart_contracts/htlc/resolver.algo.ts:48-53
+    // smart_contracts/htlc/resolver.algo.ts:59-64
     // itxn
     //   .applicationCall({
     //     appId: factoryAppId,
@@ -213,7 +256,7 @@ claimEscrow:
     intc_2 // 6
     itxn_field TypeEnum
     itxn_field Fee
-    // smart_contracts/htlc/resolver.algo.ts:48-54
+    // smart_contracts/htlc/resolver.algo.ts:59-65
     // itxn
     //   .applicationCall({
     //     appId: factoryAppId,

@@ -1,14 +1,179 @@
 import { AlgorandClient } from "@algorandfoundation/algokit-utils";
-import { EscrowFactory } from "../artifacts/htlc/EscrowClient";
+import { EscrowClient, EscrowFactory } from "../artifacts/htlc/EscrowClient";
 import { EscrowFactoryFactory } from "../artifacts/htlc/EscrowFactoryClient";
+import { ResolverFactory } from "../artifacts/htlc/ResolverClient";
 import { keccak256, getBytes } from "ethers";
+import { hexToBytes } from "algosdk";
 
 // Below is a showcase of various deployment options you can use in TypeScript Client
 export async function deploy() {
   console.log("=== Deploying Htlc ===");
 
   //await testContractDirectly();
-  await testContractWithFactory();
+  //await testContractWithFactory();
+  await testCompleteFlow();
+}
+
+export async function testCompleteFlow() {
+  const algorand = AlgorandClient.fromEnvironment();
+  const relayer = await algorand.account.fromEnvironment("RELAYER1234567");
+
+  const maker = await algorand.account.fromEnvironment("MAKER1234567");
+  const resolver1 = await algorand.account.fromEnvironment("RESOLVER11234567");
+  const resolver2 = await algorand.account.fromEnvironment("RESOLVER21234567");
+
+  const escrowFactory = algorand.client.getTypedAppFactory(EscrowFactory, {
+    defaultSender: relayer.addr,
+  });
+
+  const factory = algorand.client.getTypedAppFactory(EscrowFactoryFactory, {
+    defaultSender: relayer.addr,
+  });
+
+  const resolver1factory = algorand.client.getTypedAppFactory(ResolverFactory, {
+    defaultSender: resolver1.addr,
+  });
+
+  const resolver2factory = algorand.client.getTypedAppFactory(ResolverFactory, {
+    defaultSender: resolver2.addr,
+  });
+
+  const { appClient: escrowFactoryAppClient, result } = await factory.deploy({ onUpdate: "replace", onSchemaBreak: "replace" });
+  const { appClient: resolver1AppClient, result: resolver1Result } = await resolver1factory.deploy({
+    onUpdate: "replace",
+    onSchemaBreak: "replace",
+  });
+  const { appClient: resolver2AppClient, result: resolver2Result } = await resolver2factory.deploy({
+    onUpdate: "replace",
+    onSchemaBreak: "replace",
+  });
+
+  const { appClient: escrowAppClient, result: escrowResult } = await escrowFactory.deploy({
+    onUpdate: "replace",
+    onSchemaBreak: "replace",
+  });
+
+  // If app was just created fund the app accounts of EscrowFactory, Resolver1 and Resolver2
+  if (["create", "replace"].includes(result.operationPerformed)) {
+    await algorand.send.payment({
+      amount: (2).algo(),
+      sender: relayer.addr,
+      receiver: escrowFactoryAppClient.appAddress,
+    });
+  }
+
+  if (["create", "replace"].includes(resolver1Result.operationPerformed)) {
+    await algorand.send.payment({
+      amount: (2).algo(),
+      sender: relayer.addr,
+      receiver: resolver1AppClient.appAddress,
+    });
+  }
+
+  if (["create", "replace"].includes(resolver2Result.operationPerformed)) {
+    await algorand.send.payment({
+      amount: (2).algo(),
+      sender: relayer.addr,
+      receiver: resolver2AppClient.appAddress,
+    });
+  }
+
+  if (["create", "replace"].includes(escrowResult.operationPerformed)) {
+    await algorand.send.payment({
+      amount: (2).algo(),
+      sender: relayer.addr,
+      receiver: escrowAppClient.appAddress,
+    });
+  }
+
+  // maker generates secret
+  const secret = crypto.getRandomValues(new Uint8Array(32));
+  const secretHash = hexToBytes(keccak256(secret).slice(2));
+
+  console.log("Secret: ", secret);
+  console.log("Secret Hash: ", secretHash);
+
+  // maker creates deposit
+  const deposit = await algorand.createTransaction.payment({
+    amount: (1).algo(),
+    sender: maker.addr,
+    receiver: escrowFactoryAppClient.appAddress,
+  });
+  //maker creates Escrow through factory
+  const escrow = await escrowFactoryAppClient.createTransaction.createEscrow({
+    args: {
+      timelock: 1000,
+      secretHash: secretHash,
+      escrowAppId: escrowAppClient.appId,
+    },
+    sender: maker.addr,
+    signer: maker.signer,
+  });
+
+  const groupComposer = algorand.send.newGroup();
+  const group = await groupComposer.addTransaction(deposit).addTransaction(escrow.transactions[0]).send();
+  const makerEscrowAppId = group.returns?.[1]?.returnValue?.valueOf() as number;
+
+  //Relayer creates Auction with whitelisted resolvers
+
+  //Resolver bids on Auction
+
+  //Resolver creates Escrow based on Auction price
+  const resolver1Deposit = await algorand.createTransaction.payment({
+    amount: (1).algo(),
+    sender: resolver1.addr,
+    receiver: resolver1AppClient.appAddress,
+  });
+
+  const resolver1Escrow = await resolver1AppClient.createTransaction.deployEscrow({
+    args: {
+      timelock: 1000,
+      secretHash: secretHash,
+      taker: maker.addr.toString(),
+    },
+    sender: resolver1.addr,
+    signer: resolver1.signer,
+  });
+
+  const groupComposer2 = algorand.send.newGroup();
+  const group2 = await groupComposer2.addTransaction(resolver1Deposit).addTransaction(resolver1Escrow.transactions[0]).send();
+  const resolver1EscrowAppId = group2.returns?.[1]?.returnValue?.valueOf() as number;
+
+  //Relayer validates both escrows (here all same file)
+
+  //Maker shares secret with Relayer (here all same file)
+
+  //Relayer notifies resolvers (here all same file)
+
+  //Resolver claims Escrow for maker and resolver
+  const escrowMakerAppClient = algorand.client.getTypedAppClientById(EscrowClient, {
+    appId: BigInt(makerEscrowAppId),
+  });
+  const escrowResolver1AppClient = algorand.client.getTypedAppClientById(EscrowClient, {
+    appId: BigInt(resolver1EscrowAppId),
+  });
+
+  const escrowResolver1Claim = await escrowResolver1AppClient.createTransaction.withdraw({
+    args: {
+      secret: getBytes(secret),
+    },
+    sender: resolver1.addr,
+    signer: resolver1.signer,
+  });
+
+  const escrowMakerClaim = await escrowMakerAppClient.createTransaction.withdraw({
+    args: {
+      secret: getBytes(secret),
+    },
+    sender: maker.addr,
+    signer: maker.signer,
+  });
+
+  const groupComposer3 = algorand.send.newGroup();
+  const group3 = await groupComposer3
+    .addTransaction(escrowResolver1Claim.transactions[0])
+    .addTransaction(escrowMakerClaim.transactions[0])
+    .send();
 }
 
 export async function testContractWithFactory() {

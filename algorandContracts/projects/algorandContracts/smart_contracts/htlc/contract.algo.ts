@@ -1,13 +1,19 @@
 import { arc4, assert, bytes, Contract, Global, GlobalState, gtxn, itxn, op, Txn, uint64 } from "@algorandfoundation/algorand-typescript";
 import { Address } from "@algorandfoundation/algorand-typescript/arc4";
 
+interface EscrowInstance {
+  createdTime: uint64;
+  rescueTime: uint64;
+  amount: uint64;
+  creator: Address;
+  taker: Address;
+  secretHash: arc4.StaticBytes<32>;
+  active: boolean;
+}
+
 export class Escrow extends Contract {
-  public createdTime = GlobalState<uint64>();
-  public rescueTime = GlobalState<uint64>();
-  public amount = GlobalState<uint64>();
-  public creator = GlobalState<Address>();
-  public taker = GlobalState<Address>();
-  public secretHash = GlobalState<arc4.StaticBytes<32>>();
+  public escrowInstances = GlobalState<EscrowInstance[]>();
+  public escrowInstancesAmount = GlobalState<uint64>();
 
   /**
    *
@@ -16,20 +22,27 @@ export class Escrow extends Contract {
    * @param timelock The number seconds from the current time after the Escrow can be returned to the creator
    * @param secretHash Hash of the secret in keccak256
    * @param taker Creator of the escrow (Factory) can set taker address to the resolver address after it is know who won the auction
+   * @param creator Original creator of the escrow who called the factory
    */
   @arc4.abimethod()
-  public create(txnDeposit: gtxn.PaymentTxn, timelock: uint64, secretHash: arc4.StaticBytes<32>, taker: Address): void {
-    assert(txnDeposit.receiver === Global.currentApplicationAddress, "Receiver must be the escrow app");
-    assert(txnDeposit.sender === Txn.sender, "Sender of deposit must be the same as the sender of the app call");
+  public create(timelock: uint64, secretHash: arc4.StaticBytes<32>, taker: Address, creator: Address): uint64 {
+    const txnDeposit = gtxn.PaymentTxn(0);
 
-    this.amount.value = txnDeposit.amount;
-    assert(this.amount.value > 0, "Deposit should be positive number");
+    const newEscrowInstance: EscrowInstance = {
+      createdTime: this.latestTimestamp(),
+      rescueTime: Global.latestTimestamp + timelock,
+      amount: txnDeposit.amount,
+      creator: creator,
+      taker: taker,
+      secretHash: secretHash,
+      active: true,
+    };
 
-    this.createdTime.value = this.latestTimestamp();
-    this.rescueTime.value = Global.latestTimestamp + timelock;
-    this.secretHash.value = secretHash;
-    this.taker.value = taker;
-    this.creator.value = new Address(Txn.sender);
+    this.escrowInstances.value = [...this.escrowInstances.value, newEscrowInstance];
+
+    this.escrowInstancesAmount.value++;
+
+    return this.escrowInstancesAmount.value;
   }
 
   /**
@@ -38,13 +51,15 @@ export class Escrow extends Contract {
    * @param secret Secret
    */
   @arc4.abimethod()
-  public withdraw(secret: arc4.StaticBytes<32>) {
-    assert(this.makeHash(secret) === this.secretHash.value.bytes, "The password is not correct");
+  public withdraw(secret: arc4.StaticBytes<32>, escrowId: uint64) {
+    const escrowInstance = this.escrowInstances.value[escrowId];
 
-    assert(this.latestTimestamp() < this.rescueTime.value, "Escrow can be redeemed with password up to the rescue time");
+    assert(this.makeHash(secret) === escrowInstance.secretHash.bytes, "The password is not correct");
+
+    assert(this.latestTimestamp() < escrowInstance.rescueTime, "Escrow can be redeemed with password up to the rescue time");
 
     // send payment to the taker
-    this._send(this.taker.value, this.amount.value);
+    this._send(escrowInstance.taker, escrowInstance.amount);
   }
   /**
    * After timelock runs out refund to original sender
@@ -52,11 +67,13 @@ export class Escrow extends Contract {
    * @param secretHash Hash of the secret in keccak256
    */
   @arc4.abimethod()
-  public cancel() {
-    assert(this.rescueTime.value < this.latestTimestamp(), "The escrow cannot be canceled yet");
+  public cancel(escrowId: uint64) {
+    const escrowInstance = this.escrowInstances.value[escrowId];
+
+    assert(this.latestTimestamp() > escrowInstance.rescueTime, "The escrow cannot be canceled yet");
 
     // send payment to the creator
-    this._send(this.creator.value, this.amount.value);
+    this._send(escrowInstance.creator, escrowInstance.amount);
   }
 
   /**
