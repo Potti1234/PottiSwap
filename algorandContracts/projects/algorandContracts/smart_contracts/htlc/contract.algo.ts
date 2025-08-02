@@ -22,17 +22,14 @@ export class Escrow extends Contract {
    * @param timelock The number seconds from the current time after the Escrow can be returned to the creator
    * @param secretHash Hash of the secret in keccak256
    * @param taker Creator of the escrow (Factory) can set taker address to the resolver address after it is know who won the auction
-   * @param creator Original creator of the escrow who called the factory
    */
   @arc4.abimethod()
-  public create(timelock: uint64, secretHash: arc4.StaticBytes<32>, taker: Address, creator: Address): uint64 {
-    const txnDeposit = gtxn.PaymentTxn(0);
-
+  public create(timelock: uint64, secretHash: arc4.StaticBytes<32>, taker: Address, txnDeposit: gtxn.PaymentTxn): uint64 {
     const newEscrowInstance: EscrowInstance = {
       createdTime: this.latestTimestamp(),
       rescueTime: Global.latestTimestamp + timelock,
       amount: txnDeposit.amount,
-      creator: creator,
+      creator: new Address(txnDeposit.sender),
       taker: taker,
       secretHash: secretHash,
       active: true,

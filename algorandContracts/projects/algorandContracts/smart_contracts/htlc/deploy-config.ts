@@ -1,6 +1,5 @@
 import { AlgorandClient } from "@algorandfoundation/algokit-utils";
 import { EscrowClient, EscrowFactory } from "../artifacts/htlc/EscrowClient";
-import { EscrowFactoryFactory } from "../artifacts/htlc/EscrowFactoryClient";
 import { ResolverFactory } from "../artifacts/htlc/ResolverClient";
 import { keccak256, getBytes } from "ethers";
 import { hexToBytes } from "algosdk";
@@ -16,17 +15,13 @@ export async function deploy() {
 
 export async function testCompleteFlow() {
   const algorand = AlgorandClient.fromEnvironment();
-  const relayer = await algorand.account.fromEnvironment("RELAYER1234567");
+  const relayer = await algorand.account.fromEnvironment("RELAYER2");
 
-  const maker = await algorand.account.fromEnvironment("MAKER1234567");
-  const resolver1 = await algorand.account.fromEnvironment("RESOLVER11234567");
-  const resolver2 = await algorand.account.fromEnvironment("RESOLVER21234567");
+  const maker = await algorand.account.fromEnvironment("MAKER2");
+  const resolver1 = await algorand.account.fromEnvironment("RESOLVER12");
+  const resolver2 = await algorand.account.fromEnvironment("RESOLVER22");
 
   const escrowFactory = algorand.client.getTypedAppFactory(EscrowFactory, {
-    defaultSender: relayer.addr,
-  });
-
-  const factory = algorand.client.getTypedAppFactory(EscrowFactoryFactory, {
     defaultSender: relayer.addr,
   });
 
@@ -38,7 +33,6 @@ export async function testCompleteFlow() {
     defaultSender: resolver2.addr,
   });
 
-  const { appClient: escrowFactoryAppClient, result } = await factory.deploy({ onUpdate: "replace", onSchemaBreak: "replace" });
   const { appClient: resolver1AppClient, result: resolver1Result } = await resolver1factory.deploy({
     onUpdate: "replace",
     onSchemaBreak: "replace",
@@ -54,13 +48,6 @@ export async function testCompleteFlow() {
   });
 
   // If app was just created fund the app accounts of EscrowFactory, Resolver1 and Resolver2
-  if (["create", "replace"].includes(result.operationPerformed)) {
-    await algorand.send.payment({
-      amount: (2).algo(),
-      sender: relayer.addr,
-      receiver: escrowFactoryAppClient.appAddress,
-    });
-  }
 
   if (["create", "replace"].includes(resolver1Result.operationPerformed)) {
     await algorand.send.payment({
@@ -94,25 +81,26 @@ export async function testCompleteFlow() {
   console.log("Secret Hash: ", secretHash);
 
   // maker creates deposit
-  const deposit = await algorand.createTransaction.payment({
+  const deposit = await algorand.send.payment({
     amount: (1).algo(),
     sender: maker.addr,
-    receiver: escrowFactoryAppClient.appAddress,
+    receiver: escrowAppClient.appAddress,
   });
-  //maker creates Escrow through factory
-  const escrow = await escrowFactoryAppClient.createTransaction.createEscrow({
+
+  console.log("Deposit: ", deposit);
+  //maker creates Escrow
+  const escrow = await escrowAppClient.createTransaction.create({
     args: {
       timelock: 1000,
       secretHash: secretHash,
-      escrowAppId: escrowAppClient.appId,
+      taker: resolver1.addr.toString(),
+      txnDeposit: deposit.transaction,
     },
     sender: maker.addr,
     signer: maker.signer,
   });
 
-  const groupComposer = algorand.send.newGroup();
-  const group = await groupComposer.addTransaction(deposit).addTransaction(escrow.transactions[0]).send();
-  const makerEscrowAppId = group.returns?.[1]?.returnValue?.valueOf() as number;
+  console.log("Escrow: ", escrow);
 
   //Relayer creates Auction with whitelisted resolvers
 

@@ -9,7 +9,7 @@ main:
     // export class Escrow extends Contract {
     txn NumAppArgs
     bz main_bare_routing@10
-    pushbytess 0x35b09041 0xa7dba54a 0x772b39ba 0xdee13de1 0x64ccd930 // method "create(uint64,byte[32],address,address)uint64", method "withdraw(byte[32],uint64)void", method "cancel(uint64)void", method "makeHash(byte[32])byte[]", method "latestTimestamp()uint64"
+    pushbytess 0xdeb6f0e6 0xa7dba54a 0x772b39ba 0xdee13de1 0x64ccd930 // method "create(uint64,byte[32],address,pay)uint64", method "withdraw(byte[32],uint64)void", method "cancel(uint64)void", method "makeHash(byte[32])byte[]", method "latestTimestamp()uint64"
     txna ApplicationArgs 0
     match main_create_route@3 main_withdraw_route@4 main_cancel_route@5 main_makeHash_route@6 main_latestTimestamp_route@7
 
@@ -20,7 +20,7 @@ main_after_if_else@14:
     return
 
 main_latestTimestamp_route@7:
-    // smart_contracts/htlc/contract.algo.ts:107
+    // smart_contracts/htlc/contract.algo.ts:104
     // @arc4.abimethod({ readonly: true })
     txn OnCompletion
     !
@@ -37,7 +37,7 @@ main_latestTimestamp_route@7:
     return
 
 main_makeHash_route@6:
-    // smart_contracts/htlc/contract.algo.ts:98
+    // smart_contracts/htlc/contract.algo.ts:95
     // @arc4.abimethod({ readonly: true })
     txn OnCompletion
     !
@@ -47,7 +47,7 @@ main_makeHash_route@6:
     // smart_contracts/htlc/contract.algo.ts:14
     // export class Escrow extends Contract {
     txna ApplicationArgs 1
-    // smart_contracts/htlc/contract.algo.ts:98
+    // smart_contracts/htlc/contract.algo.ts:95
     // @arc4.abimethod({ readonly: true })
     callsub makeHash
     dup
@@ -64,7 +64,7 @@ main_makeHash_route@6:
     return
 
 main_cancel_route@5:
-    // smart_contracts/htlc/contract.algo.ts:69
+    // smart_contracts/htlc/contract.algo.ts:66
     // @arc4.abimethod()
     txn OnCompletion
     !
@@ -75,14 +75,14 @@ main_cancel_route@5:
     // export class Escrow extends Contract {
     txna ApplicationArgs 1
     btoi
-    // smart_contracts/htlc/contract.algo.ts:69
+    // smart_contracts/htlc/contract.algo.ts:66
     // @arc4.abimethod()
     callsub cancel
     intc_0 // 1
     return
 
 main_withdraw_route@4:
-    // smart_contracts/htlc/contract.algo.ts:53
+    // smart_contracts/htlc/contract.algo.ts:50
     // @arc4.abimethod()
     txn OnCompletion
     !
@@ -94,14 +94,14 @@ main_withdraw_route@4:
     txna ApplicationArgs 1
     txna ApplicationArgs 2
     btoi
-    // smart_contracts/htlc/contract.algo.ts:53
+    // smart_contracts/htlc/contract.algo.ts:50
     // @arc4.abimethod()
     callsub withdraw
     intc_0 // 1
     return
 
 main_create_route@3:
-    // smart_contracts/htlc/contract.algo.ts:27
+    // smart_contracts/htlc/contract.algo.ts:26
     // @arc4.abimethod()
     txn OnCompletion
     !
@@ -114,8 +114,15 @@ main_create_route@3:
     btoi
     txna ApplicationArgs 2
     txna ApplicationArgs 3
-    txna ApplicationArgs 4
-    // smart_contracts/htlc/contract.algo.ts:27
+    txn GroupIndex
+    intc_0 // 1
+    -
+    dup
+    gtxns TypeEnum
+    intc_0 // pay
+    ==
+    assert // transaction type is pay
+    // smart_contracts/htlc/contract.algo.ts:26
     // @arc4.abimethod()
     callsub create
     itob
@@ -138,53 +145,48 @@ main_bare_routing@10:
     return
 
 
-// smart_contracts/htlc/contract.algo.ts::Escrow.create(timelock: uint64, secretHash: bytes, taker: bytes, creator: bytes) -> uint64:
+// smart_contracts/htlc/contract.algo.ts::Escrow.create(timelock: uint64, secretHash: bytes, taker: bytes, txnDeposit: uint64) -> uint64:
 create:
-    // smart_contracts/htlc/contract.algo.ts:27-28
+    // smart_contracts/htlc/contract.algo.ts:26-27
     // @arc4.abimethod()
-    // public create(timelock: uint64, secretHash: arc4.StaticBytes<32>, taker: Address, creator: Address): uint64 {
+    // public create(timelock: uint64, secretHash: arc4.StaticBytes<32>, taker: Address, txnDeposit: gtxn.PaymentTxn): uint64 {
     proto 4 1
     // smart_contracts/htlc/contract.algo.ts:29
-    // const txnDeposit = gtxn.PaymentTxn(0);
-    intc_1 // 0
-    gtxns TypeEnum
-    intc_0 // pay
-    ==
-    assert // transaction type is pay
-    // smart_contracts/htlc/contract.algo.ts:32
     // createdTime: this.latestTimestamp(),
     callsub latestTimestamp
-    // smart_contracts/htlc/contract.algo.ts:33
+    // smart_contracts/htlc/contract.algo.ts:30
     // rescueTime: Global.latestTimestamp + timelock,
     global LatestTimestamp
     frame_dig -4
     +
-    // smart_contracts/htlc/contract.algo.ts:29
-    // const txnDeposit = gtxn.PaymentTxn(0);
-    intc_1 // 0
-    // smart_contracts/htlc/contract.algo.ts:34
+    // smart_contracts/htlc/contract.algo.ts:31
     // amount: txnDeposit.amount,
+    frame_dig -1
     gtxns Amount
+    // smart_contracts/htlc/contract.algo.ts:32
+    // creator: new Address(txnDeposit.sender),
+    frame_dig -1
+    gtxns Sender
     // smart_contracts/htlc/contract.algo.ts:15
     // public escrowInstances = GlobalState<EscrowInstance[]>();
     intc_1 // 0
     bytec_0 // "escrowInstances"
     app_global_get_ex
     assert // check GlobalState exists
-    // smart_contracts/htlc/contract.algo.ts:41
+    // smart_contracts/htlc/contract.algo.ts:38
     // this.escrowInstances.value = [...this.escrowInstances.value, newEscrowInstance];
     extract 2 0
-    // smart_contracts/htlc/contract.algo.ts:31
+    // smart_contracts/htlc/contract.algo.ts:28
     // const newEscrowInstance: EscrowInstance = {
-    uncover 3
+    uncover 4
     itob
+    uncover 4
+    itob
+    concat
     uncover 3
     itob
     concat
     uncover 2
-    itob
-    concat
-    frame_dig -1
     concat
     frame_dig -2
     concat
@@ -192,7 +194,7 @@ create:
     concat
     pushbytes 0x80
     concat
-    // smart_contracts/htlc/contract.algo.ts:41
+    // smart_contracts/htlc/contract.algo.ts:38
     // this.escrowInstances.value = [...this.escrowInstances.value, newEscrowInstance];
     dup
     len
@@ -215,7 +217,7 @@ create:
     // smart_contracts/htlc/contract.algo.ts:15
     // public escrowInstances = GlobalState<EscrowInstance[]>();
     bytec_0 // "escrowInstances"
-    // smart_contracts/htlc/contract.algo.ts:41
+    // smart_contracts/htlc/contract.algo.ts:38
     // this.escrowInstances.value = [...this.escrowInstances.value, newEscrowInstance];
     swap
     app_global_put
@@ -225,14 +227,14 @@ create:
     bytec_2 // "escrowInstancesAmount"
     app_global_get_ex
     assert // check GlobalState exists
-    // smart_contracts/htlc/contract.algo.ts:43
+    // smart_contracts/htlc/contract.algo.ts:40
     // this.escrowInstancesAmount.value++;
     intc_0 // 1
     +
     // smart_contracts/htlc/contract.algo.ts:16
     // public escrowInstancesAmount = GlobalState<uint64>();
     bytec_2 // "escrowInstancesAmount"
-    // smart_contracts/htlc/contract.algo.ts:43
+    // smart_contracts/htlc/contract.algo.ts:40
     // this.escrowInstancesAmount.value++;
     swap
     app_global_put
@@ -242,14 +244,14 @@ create:
     bytec_2 // "escrowInstancesAmount"
     app_global_get_ex
     assert // check GlobalState exists
-    // smart_contracts/htlc/contract.algo.ts:45
+    // smart_contracts/htlc/contract.algo.ts:42
     // return this.escrowInstancesAmount.value;
     retsub
 
 
 // smart_contracts/htlc/contract.algo.ts::Escrow.withdraw(secret: bytes, escrowId: uint64) -> void:
 withdraw:
-    // smart_contracts/htlc/contract.algo.ts:53-54
+    // smart_contracts/htlc/contract.algo.ts:50-51
     // @arc4.abimethod()
     // public withdraw(secret: arc4.StaticBytes<32>, escrowId: uint64) {
     proto 2 0
@@ -259,7 +261,7 @@ withdraw:
     bytec_0 // "escrowInstances"
     app_global_get_ex
     assert // check GlobalState exists
-    // smart_contracts/htlc/contract.algo.ts:55
+    // smart_contracts/htlc/contract.algo.ts:52
     // const escrowInstance = this.escrowInstances.value[escrowId];
     extract 2 0
     frame_dig -1
@@ -277,19 +279,19 @@ withdraw:
     extract 56 32 // on error: Index access is out of bounds
     uncover 3
     extract 88 32 // on error: Index access is out of bounds
-    // smart_contracts/htlc/contract.algo.ts:57
+    // smart_contracts/htlc/contract.algo.ts:54
     // assert(this.makeHash(secret) === escrowInstance.secretHash.bytes, "The password is not correct");
     frame_dig -2
     callsub makeHash
     ==
     assert // The password is not correct
-    // smart_contracts/htlc/contract.algo.ts:59
+    // smart_contracts/htlc/contract.algo.ts:56
     // assert(this.latestTimestamp() < escrowInstance.rescueTime, "Escrow can be redeemed with password up to the rescue time");
     callsub latestTimestamp
     uncover 3
     <
     assert // Escrow can be redeemed with password up to the rescue time
-    // smart_contracts/htlc/contract.algo.ts:62
+    // smart_contracts/htlc/contract.algo.ts:59
     // this._send(escrowInstance.taker, escrowInstance.amount);
     swap
     callsub _send
@@ -298,7 +300,7 @@ withdraw:
 
 // smart_contracts/htlc/contract.algo.ts::Escrow.cancel(escrowId: uint64) -> void:
 cancel:
-    // smart_contracts/htlc/contract.algo.ts:69-70
+    // smart_contracts/htlc/contract.algo.ts:66-67
     // @arc4.abimethod()
     // public cancel(escrowId: uint64) {
     proto 1 0
@@ -308,7 +310,7 @@ cancel:
     bytec_0 // "escrowInstances"
     app_global_get_ex
     assert // check GlobalState exists
-    // smart_contracts/htlc/contract.algo.ts:71
+    // smart_contracts/htlc/contract.algo.ts:68
     // const escrowInstance = this.escrowInstances.value[escrowId];
     extract 2 0
     frame_dig -1
@@ -324,13 +326,13 @@ cancel:
     extract_uint64
     uncover 2
     extract 24 32 // on error: Index access is out of bounds
-    // smart_contracts/htlc/contract.algo.ts:73
+    // smart_contracts/htlc/contract.algo.ts:70
     // assert(this.latestTimestamp() > escrowInstance.rescueTime, "The escrow cannot be canceled yet");
     callsub latestTimestamp
     uncover 3
     >
     assert // The escrow cannot be canceled yet
-    // smart_contracts/htlc/contract.algo.ts:76
+    // smart_contracts/htlc/contract.algo.ts:73
     // this._send(escrowInstance.creator, escrowInstance.amount);
     swap
     callsub _send
@@ -339,10 +341,10 @@ cancel:
 
 // smart_contracts/htlc/contract.algo.ts::Escrow._send(receiver: bytes, amount: uint64) -> void:
 _send:
-    // smart_contracts/htlc/contract.algo.ts:82
+    // smart_contracts/htlc/contract.algo.ts:79
     // private _send(receiver: Address, amount: uint64): void {
     proto 2 0
-    // smart_contracts/htlc/contract.algo.ts:83-89
+    // smart_contracts/htlc/contract.algo.ts:80-86
     // itxn
     //   .payment({
     //     amount: amount,
@@ -351,14 +353,14 @@ _send:
     //   })
     //   .submit();
     itxn_begin
-    // smart_contracts/htlc/contract.algo.ts:86
+    // smart_contracts/htlc/contract.algo.ts:83
     // fee: Global.minTxnFee,
     global MinTxnFee
     frame_dig -2
     itxn_field Receiver
     frame_dig -1
     itxn_field Amount
-    // smart_contracts/htlc/contract.algo.ts:83-88
+    // smart_contracts/htlc/contract.algo.ts:80-85
     // itxn
     //   .payment({
     //     amount: amount,
@@ -368,7 +370,7 @@ _send:
     intc_0 // 1
     itxn_field TypeEnum
     itxn_field Fee
-    // smart_contracts/htlc/contract.algo.ts:83-89
+    // smart_contracts/htlc/contract.algo.ts:80-86
     // itxn
     //   .payment({
     //     amount: amount,
@@ -382,11 +384,11 @@ _send:
 
 // smart_contracts/htlc/contract.algo.ts::Escrow.makeHash(secret: bytes) -> bytes:
 makeHash:
-    // smart_contracts/htlc/contract.algo.ts:98-99
+    // smart_contracts/htlc/contract.algo.ts:95-96
     // @arc4.abimethod({ readonly: true })
     // public makeHash(secret: arc4.StaticBytes<32>): bytes {
     proto 1 1
-    // smart_contracts/htlc/contract.algo.ts:100
+    // smart_contracts/htlc/contract.algo.ts:97
     // return op.keccak256(secret.bytes);
     frame_dig -1
     keccak256
@@ -395,7 +397,7 @@ makeHash:
 
 // smart_contracts/htlc/contract.algo.ts::Escrow.latestTimestamp() -> uint64:
 latestTimestamp:
-    // smart_contracts/htlc/contract.algo.ts:109
+    // smart_contracts/htlc/contract.algo.ts:106
     // return Global.latestTimestamp;
     global LatestTimestamp
     retsub
