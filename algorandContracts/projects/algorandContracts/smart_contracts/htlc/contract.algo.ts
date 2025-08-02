@@ -12,8 +12,8 @@ interface EscrowInstance {
 }
 
 export class Escrow extends Contract {
-  public escrowInstances = GlobalState<EscrowInstance[]>();
-  public escrowInstancesAmount = GlobalState<uint64>();
+  public escrowInstances = GlobalState<EscrowInstance[]>({ initialValue: [] });
+  public escrowInstancesAmount = GlobalState<uint64>({ initialValue: 0 });
 
   /**
    *
