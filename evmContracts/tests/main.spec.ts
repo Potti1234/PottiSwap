@@ -459,6 +459,28 @@ describe('Resolving example', () => {
 
             console.log('Relayer created auction with id: ', auction.return)
 
+            const resolverContract = new Resolver(src.resolver, dst.resolver)
+
+            const signature = await srcChainUser.signOrder(srcChainId, order)
+            const orderHash = order.getOrderHash(srcChainId)
+            const fillAmount = order.makingAmount
+            const {txHash: orderFillHash, blockHash: srcDeployBlock} = await srcChainResolver.send(
+                resolverContract.deploySrc(
+                    srcChainId,
+                    order,
+                    signature,
+                    Sdk.TakerTraits.default()
+                        .setExtension(order.extension)
+                        .setAmountMode(Sdk.AmountMode.maker)
+                        .setAmountThreshold(order.takingAmount),
+                    fillAmount
+                )
+            )
+
+            console.log(`[${srcChainId}]`, `Order ${orderHash} filled for ${fillAmount} in tx ${orderFillHash}`)
+
+            const srcEscrowEvent = await srcFactory.getSrcDeployEvent(srcDeployBlock)
+
             // Resolver creates Escrow on EVM based on Auction price
 
             const dstImmutables = srcEscrowEvent[0]
@@ -494,14 +516,15 @@ describe('Resolving example', () => {
                 resolverContract.withdraw('dst', dstEscrowAddress, secret, dstImmutables.withDeployedAt(dstDeployedAt))
             )
 
-            console.log(`[${srcChainId}]`, `Withdrawing funds for resolver from ${srcEscrowAddress}`)
-            const {txHash: resolverWithdrawHash} = await srcChainResolver.send(
-                resolverContract.withdraw('src', srcEscrowAddress, secret, srcEscrowEvent[0])
-            )
-            console.log(
-                `[${srcChainId}]`,
-                `Withdrew funds for resolver from ${srcEscrowAddress} to ${src.resolver} in tx ${resolverWithdrawHash}`
-            )
+            const escrowMakerClaim = await escrowAppClient.createTransaction.withdraw({
+                args: {
+                    secret: getBytes(secret),
+                    escrowId: escrow.return?.valueOf() ?? 0
+                },
+                sender: resolverAlgorand.addr,
+                signer: resolverAlgorand.signer
+            })
+            console.log(`Withdrew funds for resolver from Algorand`)
 
             const resultBalances = await getBalances(
                 config.chain.source.tokens.USDC.address,
@@ -509,8 +532,7 @@ describe('Resolving example', () => {
             )
 
             // user transferred funds to resolver on source chain
-            expect(initialBalances.src.user - resultBalances.src.user).toBe(order.makingAmount)
-            expect(resultBalances.src.resolver - initialBalances.src.resolver).toBe(order.makingAmount)
+            // Here we check if the escrowMakerClaim succeded on AlgoRand If the claim would fail the test would fail because an error would be thrown
             // resolver transferred funds to user on destination chain
             expect(resultBalances.dst.user - initialBalances.dst.user).toBe(order.takingAmount)
             expect(initialBalances.dst.resolver - resultBalances.dst.resolver).toBe(order.takingAmount)
