@@ -23,6 +23,10 @@ import {Resolver} from './resolver'
 import {EscrowFactory} from './escrow-factory'
 import factoryContract from '../out/TestEscrowFactory.sol/TestEscrowFactory.json'
 import resolverContract from '../out/Resolver.sol/Resolver.json'
+import {AlgorandClient} from '@algorandfoundation/algokit-utils'
+import {AuctionFactory as AuctionFactoryAlgo} from '../../algorandContracts/projects/algorandContracts/smart_contracts/htlc/AuctionClient'
+import {EscrowFactory as EscrowFactoryAlgo} from '../../algorandContracts/projects/algorandContracts/smart_contracts/htlc/EscrowClient'
+import {ResolverFactory as ResolverFactoryAlgo} from '../../algorandContracts/projects/algorandContracts/smart_contracts/htlc/ResolverClient'
 
 const {Address} = Sdk
 
@@ -57,6 +61,11 @@ describe('Resolving example', () => {
     let dstResolverContract: Wallet
 
     let srcTimestamp: bigint
+
+    let algorand: AlgorandClient
+    let deployerAlgorand
+    let makerAlgo
+    let resolverAlgorand
 
     async function increaseTime(t: number): Promise<void> {
         await Promise.all([src, dst].map((chain) => chain.provider.send('evm_increaseTime', [t])))
@@ -97,6 +106,67 @@ describe('Resolving example', () => {
         await dstResolverContract.unlimitedApprove(config.chain.destination.tokens.USDC.address, dst.escrowFactory)
 
         srcTimestamp = BigInt((await src.provider.getBlock('latest'))!.timestamp)
+
+        // Algorand Setup
+        // Create accounts for maker, resolver and relayer on local network
+        algorand = AlgorandClient.fromEnvironment()
+        deployerAlgorand = await algorand.account.fromEnvironment('Deployer')
+        makerAlgo = await algorand.account.fromEnvironment('maker')
+        resolverAlgorand = await algorand.account.fromEnvironment('resolver')
+
+        // deploy and fund algorand Contracts
+        const escrowFactory = algorand.client.getTypedAppFactory(EscrowFactoryAlgo, {
+            defaultSender: deployerAlgorand.addr
+        })
+
+        const auctionFactory = algorand.client.getTypedAppFactory(AuctionFactoryAlgo, {
+            defaultSender: deployerAlgorand.addr
+        })
+
+        const resolver1factory = algorand.client.getTypedAppFactory(ResolverFactoryAlgo, {
+            defaultSender: resolverAlgorand.addr
+        })
+
+        const {appClient: resolver1AppClient, result: resolver1Result} = await resolver1factory.deploy({
+            onUpdate: 'replace',
+            onSchemaBreak: 'replace'
+        })
+
+        const {appClient: escrowAppClient, result: escrowResult} = await escrowFactory.deploy({
+            onUpdate: 'replace',
+            onSchemaBreak: 'replace'
+        })
+
+        const {appClient: auctionAppClient, result: auctionResult} = await auctionFactory.deploy({
+            onUpdate: 'replace',
+            onSchemaBreak: 'replace'
+        })
+
+        // If app was just created fund the app accounts of EscrowFactory, Resolver1 and Resolver2
+
+        if (['create', 'replace'].includes(resolver1Result.operationPerformed)) {
+            await algorand.send.payment({
+                amount: (2).algo(),
+                sender: deployerAlgorand.addr,
+                receiver: resolver1AppClient.appAddress
+            })
+        }
+
+        if (['create', 'replace'].includes(escrowResult.operationPerformed)) {
+            await algorand.send.payment({
+                amount: (2).algo(),
+                sender: deployerAlgorand.addr,
+                receiver: escrowAppClient.appAddress
+            })
+        }
+
+        if (['create', 'replace'].includes(auctionResult.operationPerformed)) {
+            await algorand.send.payment({
+                amount: (2).algo(),
+                sender: deployerAlgorand.addr,
+                receiver: auctionAppClient.appAddress
+            })
+        }
     })
 
     async function getBalances(

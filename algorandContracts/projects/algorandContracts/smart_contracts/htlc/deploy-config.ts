@@ -16,11 +16,11 @@ export async function deploy() {
 
 export async function testCompleteFlow() {
   const algorand = AlgorandClient.fromEnvironment();
-  const relayer = await algorand.account.fromEnvironment("RELAYER23456789");
+  const relayer = await algorand.account.fromEnvironment("RELAYER34");
 
-  const maker = await algorand.account.fromEnvironment("MAKER23456789");
-  const resolver1 = await algorand.account.fromEnvironment("RESOLVER123456789");
-  const resolver2 = await algorand.account.fromEnvironment("RESOLVER223456789");
+  const maker = await algorand.account.fromEnvironment("MAKER34");
+  const resolver1 = await algorand.account.fromEnvironment("RESOLVER134");
+  const resolver2 = await algorand.account.fromEnvironment("RESOLVER234");
 
   let makerInfo = await algorand.account.getInformation(maker.addr);
   let resolver1Info = await algorand.account.getInformation(resolver1.addr);
@@ -113,7 +113,7 @@ export async function testCompleteFlow() {
     receiver: escrowAppClient.appAddress,
   });
 
-  console.log("Deposit: ", deposit);
+  //console.log("Deposit: ", deposit);
   //maker creates Escrow
   const escrow = await escrowAppClient.send.create({
     args: {
@@ -127,7 +127,7 @@ export async function testCompleteFlow() {
   });
 
   makerInfo = await algorand.account.getInformation(maker.addr);
-  console.log("Escrow: ", escrow);
+  console.log("Maker created escrow with id: ", escrow.return);
   console.log("Maker Holdings after escrow: ", makerInfo.balance);
 
   //Relayer creates Auction with whitelisted resolvers
@@ -143,7 +143,7 @@ export async function testCompleteFlow() {
     signer: relayer.signer,
   });
 
-  console.log("Auction: ", auction);
+  //console.log("Auction: ", auction);
 
   //Resolver bids on Auction
   const bid = await auctionAppClient.send.bid({
@@ -154,7 +154,7 @@ export async function testCompleteFlow() {
     signer: resolver1.signer,
   });
 
-  console.log("Bid: ", bid);
+  //console.log("Bid: ", bid);
 
   //Resolver creates Escrow based on Auction price
   const resolver1Deposit = await algorand.send.payment({
@@ -163,7 +163,7 @@ export async function testCompleteFlow() {
     receiver: escrowAppClient.appAddress,
   });
 
-  console.log("Resolver1 Deposit: ", resolver1Deposit);
+  //console.log("Resolver1 Deposit: ", resolver1Deposit);
 
   const resolver1Escrow = await escrowAppClient.send.create({
     args: {
@@ -177,7 +177,7 @@ export async function testCompleteFlow() {
   });
 
   resolver1Info = await algorand.account.getInformation(resolver1.addr);
-  console.log("Resolver1 Escrow: ", resolver1Escrow);
+  console.log("Resolver1 created escrow with id: ", resolver1Escrow.return);
   console.log("Resolver1 Holdings after escrow: ", resolver1Info.balance);
 
   //Relayer validates both escrows (here all same file)
@@ -193,122 +193,26 @@ export async function testCompleteFlow() {
   const escrowResolver1Claim = await escrowAppClient.createTransaction.withdraw({
     args: {
       secret: getBytes(secret),
-      escrowId: 0,
+      escrowId: resolver1Escrow.return?.valueOf() ?? 0,
     },
     sender: resolver1.addr,
     signer: resolver1.signer,
   });
 
-  console.log("Escrow Resolver1 Claim: ", escrowResolver1Claim);
+  //console.log("Escrow Resolver1 Claim: ", escrowResolver1Claim);
   resolver1Info = await algorand.account.getInformation(resolver1.addr);
   console.log("Resolver1 Holdings after claim: ", resolver1Info.balance);
 
   const escrowMakerClaim = await escrowAppClient.createTransaction.withdraw({
     args: {
       secret: getBytes(secret),
-      escrowId: 1,
+      escrowId: escrow.return?.valueOf() ?? 0,
     },
-    sender: maker.addr,
-    signer: maker.signer,
+    sender: resolver1.addr,
+    signer: resolver1.signer,
   });
 
-  console.log("Escrow Maker Claim: ", escrowMakerClaim);
+  //console.log("Escrow Maker Claim: ", escrowMakerClaim);
   makerInfo = await algorand.account.getInformation(maker.addr);
   console.log("Maker Holdings after claim: ", makerInfo.balance);
-}
-
-export async function testContractWithFactory() {
-  const algorand = AlgorandClient.fromEnvironment();
-  const deployer = await algorand.account.fromEnvironment("DEPLOY5");
-
-  const maker = await algorand.account.fromEnvironment("MAKER");
-  const taker = await algorand.account.fromEnvironment("TAKER");
-
-  const factory = algorand.client.getTypedAppFactory(EscrowFactoryFactory, {
-    defaultSender: deployer.addr,
-  });
-
-  const { appClient, result } = await factory.deploy({ onUpdate: "replace", onSchemaBreak: "replace" });
-
-  // If app was just created fund the app account
-  if (["create", "replace"].includes(result.operationPerformed)) {
-    await algorand.send.payment({
-      amount: (2).algo(),
-      sender: deployer.addr,
-      receiver: appClient.appAddress,
-    });
-  }
-
-  const deposit = await algorand.send.payment({
-    amount: (1).algo(),
-    sender: maker.addr,
-    receiver: appClient.appAddress,
-  });
-
-  const secret = crypto.getRandomValues(new Uint8Array(32));
-  const secretHash = keccak256(secret);
-
-  const escrow = await appClient.send.createEscrow({
-    args: {
-      txnDeposit: deposit.transaction,
-      timelock: 1000,
-      secretHash: getBytes(secretHash),
-      taker: taker.addr.toString(),
-    },
-    sender: maker.addr,
-    signer: maker.signer,
-  });
-
-  console.log("Escrow created with ID: ", escrow);
-}
-
-export async function testContractDirectly() {
-  const algorand = AlgorandClient.fromEnvironment();
-  const deployer = await algorand.account.fromEnvironment("DEPLOY5");
-
-  const maker = await algorand.account.fromEnvironment("MAKER");
-  const taker = await algorand.account.fromEnvironment("TAKER");
-
-  const factory = algorand.client.getTypedAppFactory(EscrowFactory, {
-    defaultSender: deployer.addr,
-  });
-
-  const { appClient, result } = await factory.deploy({ onUpdate: "replace", onSchemaBreak: "replace" });
-
-  // If app was just created fund the app account
-  if (["create", "replace"].includes(result.operationPerformed)) {
-    await algorand.send.payment({
-      amount: (2).algo(),
-      sender: deployer.addr,
-      receiver: appClient.appAddress,
-    });
-  }
-
-  const deposit = await algorand.send.payment({
-    amount: (1).algo(),
-    sender: maker.addr,
-    receiver: appClient.appAddress,
-  });
-
-  const secret = crypto.getRandomValues(new Uint8Array(32));
-  const secretHash = keccak256(secret);
-
-  const escrow = await appClient.send.create({
-    args: {
-      txnDeposit: deposit.transaction,
-      timelock: 1000,
-      secretHash: getBytes(secretHash),
-      taker: taker.addr.toString(),
-    },
-    sender: maker.addr,
-    signer: maker.signer,
-  });
-
-  const claim = await appClient.send.withdraw({
-    args: {
-      secret: getBytes(secret),
-    },
-    sender: taker.addr,
-    signer: taker.signer,
-  });
 }

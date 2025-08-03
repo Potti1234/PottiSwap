@@ -6,6 +6,8 @@ It is based on the 1Inch smart contracts and the 1Inch crosschain sdk
 
 # AlgoRand Contracts
 
+Algorand contracts can be found in algorandContracts/projects/algorandContracts/smart_contracts
+
 Since algorand has different functionalities compared to the EVM I had to change different parts of the structure of the crosschain swap
 
 -No Intents:

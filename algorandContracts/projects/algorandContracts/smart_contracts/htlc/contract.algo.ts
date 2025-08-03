@@ -62,7 +62,7 @@ export class Escrow extends Contract {
   public withdraw(secret: arc4.StaticBytes<32>, escrowId: uint64) {
     const escrowInstance = this.escrowInstances(escrowId).value.copy();
 
-    assert(this.makeHash(secret) === escrowInstance.secretHash.bytes, "The password is not correct");
+    assert(this.makeHash(secret) === escrowInstance.secretHash.native, "The password is not correct");
 
     assert(this.latestTimestamp() < escrowInstance.rescueTime.native, "Escrow can be redeemed with password up to the rescue time");
 

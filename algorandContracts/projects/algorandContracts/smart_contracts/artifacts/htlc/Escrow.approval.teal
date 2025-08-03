@@ -268,7 +268,7 @@ withdraw:
     box_get
     assert // Box must have value
     // smart_contracts/htlc/contract.algo.ts:65
-    // assert(this.makeHash(secret) === escrowInstance.secretHash.bytes, "The password is not correct");
+    // assert(this.makeHash(secret) === escrowInstance.secretHash.native, "The password is not correct");
     frame_dig -2
     callsub makeHash
     dig 1
