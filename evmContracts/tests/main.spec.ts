@@ -321,7 +321,7 @@ describe('Resolving example', () => {
             await increaseTime(11)
             // User shares key after validation of dst escrow deployment
             console.log(`[${dstChainId}]`, `Withdrawing funds for user from AlgoRAnd`)
-            const escrowResolver1Claim = await escrowAppClient.createTransaction.withdraw({
+            const escrowMakerClaim = await escrowAppClient.createTransaction.withdraw({
                 args: {
                     secret: getBytes(secret),
                     escrowId: resolver1Escrow.return?.valueOf() ?? 0
@@ -329,6 +329,170 @@ describe('Resolving example', () => {
                 sender: resolverAlgorand.addr,
                 signer: resolverAlgorand.signer
             })
+
+            console.log(`[${srcChainId}]`, `Withdrawing funds for resolver from ${srcEscrowAddress}`)
+            const {txHash: resolverWithdrawHash} = await srcChainResolver.send(
+                resolverContract.withdraw('src', srcEscrowAddress, secret, srcEscrowEvent[0])
+            )
+            console.log(
+                `[${srcChainId}]`,
+                `Withdrew funds for resolver from ${srcEscrowAddress} to ${src.resolver} in tx ${resolverWithdrawHash}`
+            )
+
+            const resultBalances = await getBalances(
+                config.chain.source.tokens.USDC.address,
+                config.chain.destination.tokens.USDC.address
+            )
+
+            // user transferred funds to resolver on source chain
+            expect(initialBalances.src.user - resultBalances.src.user).toBe(order.makingAmount)
+            expect(resultBalances.src.resolver - initialBalances.src.resolver).toBe(order.makingAmount)
+            // resolver transferred funds to user on destination chain
+            // Because User and resolver pay gas fees to fill the order we cant expect the same amount of funds on the destination chain
+            // So we check if the escrowMakerClaim succeded on AlgoRand If the claim would fail the test would fail because an error would be thrown
+        })
+
+        it('should swap Algo to Bsc USDC. Single fill only', async () => {
+            const initialBalances = await getBalances(
+                config.chain.source.tokens.USDC.address,
+                config.chain.destination.tokens.USDC.address
+            )
+
+            // User creates order
+            const secretRaw = crypto.getRandomValues(new Uint8Array(32))
+            const secret = uint8ArrayToHex(secretRaw)
+            const secretHash = hexToBytes(keccak256(secretRaw).slice(2))
+
+            //We dont need the SDK here because we are not using the EVM chain as source so the maker creates the Algo contracts
+            // and then the Resolver can create the evm escrow
+            // We still keep the sdk so that the other calls will still work but the source values here are not used
+            const order = Sdk.CrossChainOrder.new(
+                new Address(src.escrowFactory),
+                {
+                    salt: Sdk.randBigInt(1000n),
+                    maker: new Address(await srcChainUser.getAddress()),
+                    makingAmount: parseUnits('100', 6),
+                    takingAmount: parseUnits('99', 6),
+                    makerAsset: new Address(config.chain.source.tokens.USDC.address),
+                    takerAsset: new Address(config.chain.destination.tokens.USDC.address)
+                },
+                {
+                    hashLock: Sdk.HashLock.forSingleFill(secret),
+                    timeLocks: Sdk.TimeLocks.new({
+                        srcWithdrawal: 10n, // 10sec finality lock for test
+                        srcPublicWithdrawal: 120n, // 2m for private withdrawal
+                        srcCancellation: 121n, // 1sec public withdrawal
+                        srcPublicCancellation: 122n, // 1sec private cancellation
+                        dstWithdrawal: 10n, // 10sec finality lock for test
+                        dstPublicWithdrawal: 100n, // 100sec private withdrawal
+                        dstCancellation: 101n // 1sec public withdrawal
+                    }),
+                    srcChainId,
+                    dstChainId,
+                    srcSafetyDeposit: parseEther('0.001'),
+                    dstSafetyDeposit: parseEther('0.001')
+                },
+                {
+                    auction: new Sdk.AuctionDetails({
+                        initialRateBump: 0,
+                        points: [],
+                        duration: 120n,
+                        startTime: srcTimestamp
+                    }),
+                    whitelist: [
+                        {
+                            address: new Address(src.resolver),
+                            allowFrom: 0n
+                        }
+                    ],
+                    resolvingStartTime: 0n
+                },
+                {
+                    nonce: Sdk.randBigInt(UINT_40_MAX),
+                    allowPartialFills: false,
+                    allowMultipleFills: false
+                }
+            )
+
+            // maker creates deposit
+            const deposit = await algorand.send.payment({
+                amount: (1).algo(),
+                sender: makerAlgo.addr,
+                receiver: escrowAppClient.appAddress
+            })
+
+            //maker creates Escrow
+            const escrow = await escrowAppClient.send.create({
+                args: {
+                    timelock: 1000,
+                    secretHash: secretHash,
+                    taker: resolverAlgorand.addr.toString(),
+                    txnDeposit: deposit.transaction
+                },
+                sender: makerAlgo.addr,
+                signer: makerAlgo.signer
+            })
+
+            console.log('Maker created escrow with id: ', escrow.return)
+
+            //Relayer creates Auction with whitelisted resolvers
+            const auction = await auctionAppClient.send.createAuction({
+                args: {
+                    startPrice: 2,
+                    minPrice: 1,
+                    duration: 12,
+                    escrowId: escrow.return?.valueOf() ?? 0,
+                    escrowAppId: escrowAppClient.appId
+                },
+                sender: deployerAlgorand.addr,
+                signer: deployerAlgorand.signer
+            })
+
+            //Resolver bids on Auction
+            const bid = await auctionAppClient.send.bid({
+                args: {
+                    auctionId: 0
+                },
+                sender: resolverAlgorand.addr,
+                signer: resolverAlgorand.signer
+            })
+
+            console.log('Relayer created auction with id: ', auction.return)
+
+            // Resolver creates Escrow on EVM based on Auction price
+
+            const dstImmutables = srcEscrowEvent[0]
+                .withComplement(srcEscrowEvent[1])
+                .withTaker(new Address(resolverContract.dstAddress))
+
+            console.log(`[${dstChainId}]`, `Depositing ${dstImmutables.amount} for order ${orderHash}`)
+            const {txHash: dstDepositHash, blockTimestamp: dstDeployedAt} = await dstChainResolver.send(
+                resolverContract.deployDst(dstImmutables)
+            )
+            console.log(`[${dstChainId}]`, `Created dst deposit for order ${orderHash} in tx ${dstDepositHash}`)
+
+            const ESCROW_SRC_IMPLEMENTATION = await srcFactory.getSourceImpl()
+            const ESCROW_DST_IMPLEMENTATION = await dstFactory.getDestinationImpl()
+
+            const srcEscrowAddress = new Sdk.EscrowFactory(new Address(src.escrowFactory)).getSrcEscrowAddress(
+                srcEscrowEvent[0],
+                ESCROW_SRC_IMPLEMENTATION
+            )
+
+            const dstEscrowAddress = new Sdk.EscrowFactory(new Address(dst.escrowFactory)).getDstEscrowAddress(
+                srcEscrowEvent[0],
+                srcEscrowEvent[1],
+                dstDeployedAt,
+                new Address(resolverContract.dstAddress),
+                ESCROW_DST_IMPLEMENTATION
+            )
+
+            await increaseTime(11)
+            // User shares key after validation of dst escrow deployment
+            console.log(`[${dstChainId}]`, `Withdrawing funds for user from ${dstEscrowAddress}`)
+            await dstChainResolver.send(
+                resolverContract.withdraw('dst', dstEscrowAddress, secret, dstImmutables.withDeployedAt(dstDeployedAt))
+            )
 
             console.log(`[${srcChainId}]`, `Withdrawing funds for resolver from ${srcEscrowAddress}`)
             const {txHash: resolverWithdrawHash} = await srcChainResolver.send(
