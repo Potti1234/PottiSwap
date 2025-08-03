@@ -24,9 +24,12 @@ import {EscrowFactory} from './escrow-factory'
 import factoryContract from '../out/TestEscrowFactory.sol/TestEscrowFactory.json'
 import resolverContract from '../out/Resolver.sol/Resolver.json'
 import {AlgorandClient} from '@algorandfoundation/algokit-utils'
-import {AuctionFactory as AuctionFactoryAlgo} from '../../algorandContracts/projects/algorandContracts/smart_contracts/htlc/AuctionClient'
-import {EscrowFactory as EscrowFactoryAlgo} from '../../algorandContracts/projects/algorandContracts/smart_contracts/htlc/EscrowClient'
-import {ResolverFactory as ResolverFactoryAlgo} from '../../algorandContracts/projects/algorandContracts/smart_contracts/htlc/ResolverClient'
+import {AuctionFactory as AuctionFactoryAlgo} from '../algorandArtifacts/AuctionClient'
+import {EscrowFactory as EscrowFactoryAlgo} from '../algorandArtifacts/EscrowClient'
+import {ResolverFactory as ResolverFactoryAlgo} from '../algorandArtifacts/ResolverClient'
+import {keccak256, getBytes} from 'ethers'
+import {hexToBytes} from 'algosdk'
+import {AppClient} from '@algorandfoundation/algokit-utils/types/app-client'
 
 const {Address} = Sdk
 
@@ -66,6 +69,10 @@ describe('Resolving example', () => {
     let deployerAlgorand
     let makerAlgo
     let resolverAlgorand
+
+    let escrowAppClient: AppClient
+    let auctionAppClient: AppClient
+    let resolver1AppClient: AppClient
 
     async function increaseTime(t: number): Promise<void> {
         await Promise.all([src, dst].map((chain) => chain.provider.send('evm_increaseTime', [t])))
@@ -127,20 +134,24 @@ describe('Resolving example', () => {
             defaultSender: resolverAlgorand.addr
         })
 
-        const {appClient: resolver1AppClient, result: resolver1Result} = await resolver1factory.deploy({
+        const {appClient: resolver1AppClientSaved, result: resolver1Result} = await resolver1factory.deploy({
             onUpdate: 'replace',
             onSchemaBreak: 'replace'
         })
 
-        const {appClient: escrowAppClient, result: escrowResult} = await escrowFactory.deploy({
+        const {appClient: escrowAppClientSaved, result: escrowResult} = await escrowFactory.deploy({
             onUpdate: 'replace',
             onSchemaBreak: 'replace'
         })
 
-        const {appClient: auctionAppClient, result: auctionResult} = await auctionFactory.deploy({
+        const {appClient: auctionAppClientSaved, result: auctionResult} = await auctionFactory.deploy({
             onUpdate: 'replace',
             onSchemaBreak: 'replace'
         })
+
+        resolver1AppClient = resolver1AppClientSaved
+        escrowAppClient = escrowAppClientSaved
+        auctionAppClient = auctionAppClientSaved
 
         // If app was just created fund the app accounts of EscrowFactory, Resolver1 and Resolver2
 
@@ -193,14 +204,21 @@ describe('Resolving example', () => {
 
     // eslint-disable-next-line max-lines-per-function
     describe('Fill', () => {
-        it('should swap Ethereum USDC -> Bsc USDC. Single fill only', async () => {
+        it('should swap Ethereum USDC -> Algo. Single fill only', async () => {
             const initialBalances = await getBalances(
                 config.chain.source.tokens.USDC.address,
                 config.chain.destination.tokens.USDC.address
             )
 
             // User creates order
-            const secret = uint8ArrayToHex(randomBytes(32)) // note: use crypto secure random number in real world
+            const secretRaw = crypto.getRandomValues(new Uint8Array(32))
+            const secret = uint8ArrayToHex(secretRaw)
+            const secretHash = hexToBytes(keccak256(secretRaw).slice(2))
+
+            //Dont change sdk call because it doesnt support non EVM chains
+            //We would need to change the sdk which would require too much work for this hackathon
+            // So leave the sdk code as it is and interact directly on smart conntract level
+            //Destination values here are not used
             const order = Sdk.CrossChainOrder.new(
                 new Address(src.escrowFactory),
                 {
@@ -270,42 +288,47 @@ describe('Resolving example', () => {
                 )
             )
 
-            console.log(`[${srcChainId}]`, `Order ${orderHash} filled for ${fillAmount} in tx ${orderFillHash}`)
+            console.log(`[${srcChainId}]`, `Order ${orderHash} filled for ${fillAmount} in tx ${orderFillHash} on EVM`)
 
             const srcEscrowEvent = await srcFactory.getSrcDeployEvent(srcDeployBlock)
 
-            const dstImmutables = srcEscrowEvent[0]
-                .withComplement(srcEscrowEvent[1])
-                .withTaker(new Address(resolverContract.dstAddress))
-
-            console.log(`[${dstChainId}]`, `Depositing ${dstImmutables.amount} for order ${orderHash}`)
-            const {txHash: dstDepositHash, blockTimestamp: dstDeployedAt} = await dstChainResolver.send(
-                resolverContract.deployDst(dstImmutables)
-            )
-            console.log(`[${dstChainId}]`, `Created dst deposit for order ${orderHash} in tx ${dstDepositHash}`)
+            // Change of code instead of fill the dst escrow on EVM we fill escrow on Algorand
+            //Resolver creates Escrow based on Auction price
+            const resolver1Deposit = await algorand.send.payment({
+                amount: (1).algo(),
+                sender: resolverAlgorand.addr,
+                receiver: escrowAppClient.appAddress
+            })
+            //TODO Change timelock
+            const resolver1Escrow = await escrowAppClient.send.create({
+                args: {
+                    timelock: 1000,
+                    secretHash: secretHash,
+                    taker: makerAlgo.addr.toString(),
+                    txnDeposit: resolver1Deposit.transaction
+                },
+                sender: resolverAlgorand.addr,
+                signer: resolverAlgorand.signer
+            })
 
             const ESCROW_SRC_IMPLEMENTATION = await srcFactory.getSourceImpl()
-            const ESCROW_DST_IMPLEMENTATION = await dstFactory.getDestinationImpl()
 
             const srcEscrowAddress = new Sdk.EscrowFactory(new Address(src.escrowFactory)).getSrcEscrowAddress(
                 srcEscrowEvent[0],
                 ESCROW_SRC_IMPLEMENTATION
             )
 
-            const dstEscrowAddress = new Sdk.EscrowFactory(new Address(dst.escrowFactory)).getDstEscrowAddress(
-                srcEscrowEvent[0],
-                srcEscrowEvent[1],
-                dstDeployedAt,
-                new Address(resolverContract.dstAddress),
-                ESCROW_DST_IMPLEMENTATION
-            )
-
             await increaseTime(11)
             // User shares key after validation of dst escrow deployment
-            console.log(`[${dstChainId}]`, `Withdrawing funds for user from ${dstEscrowAddress}`)
-            await dstChainResolver.send(
-                resolverContract.withdraw('dst', dstEscrowAddress, secret, dstImmutables.withDeployedAt(dstDeployedAt))
-            )
+            console.log(`[${dstChainId}]`, `Withdrawing funds for user from AlgoRAnd`)
+            const escrowResolver1Claim = await escrowAppClient.createTransaction.withdraw({
+                args: {
+                    secret: getBytes(secret),
+                    escrowId: resolver1Escrow.return?.valueOf() ?? 0
+                },
+                sender: resolverAlgorand.addr,
+                signer: resolverAlgorand.signer
+            })
 
             console.log(`[${srcChainId}]`, `Withdrawing funds for resolver from ${srcEscrowAddress}`)
             const {txHash: resolverWithdrawHash} = await srcChainResolver.send(
